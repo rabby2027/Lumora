@@ -1366,3 +1366,251 @@ h2 {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* =========================================
+   My Readings — polished dashboard section
+   ========================================= */
+
+.readings-panel {
+  margin-bottom: 19px;
+}
+
+.readings-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 22px;
+  margin-bottom: 16px;
+}
+
+.readings-toolbar .bill-form,
+.readings-panel .bill-form {
+  margin-top: 0;
+}
+
+.readings-panel .bill-form {
+  display: grid;
+  grid-template-columns: minmax(150px, 1fr) minmax(150px, 1fr) auto;
+  align-items: end;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: rgba(8, 18, 31, 0.42);
+}
+
+.readings-panel .form-field input[type="date"],
+.readings-panel .form-field input[type="number"] {
+  width: 100%;
+  min-width: 0;
+  min-height: 41px;
+  padding: 0 11px;
+  border: 1px solid #344258;
+  border-radius: 8px;
+  background: #0b1422;
+  color: var(--text);
+  color-scheme: dark;
+  font: inherit;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.readings-panel .form-field input:focus {
+  border-color: var(--cyan);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(117, 220, 232, 0.08);
+}
+
+.readings-panel .calculate-button {
+  grid-column: auto;
+  width: auto;
+  min-height: 41px;
+  margin-top: 0;
+  white-space: nowrap;
+}
+
+.readings-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 18px 0 12px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.readings-summary strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.readings-toolbar .primary-button,
+#exportReadings {
+  flex: 0 0 auto;
+}
+
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: rgba(8, 18, 31, 0.32);
+  scrollbar-width: thin;
+  scrollbar-color: #34465b transparent;
+}
+
+.readings-table {
+  width: 100%;
+  min-width: 570px;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.readings-table thead {
+  background: #162337;
+}
+
+.readings-table th {
+  padding: 13px 15px;
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.readings-table td {
+  padding: 13px 15px;
+  border-top: 1px solid rgba(41, 55, 74, 0.8);
+  color: #dbe5f1;
+  font-size: 11px;
+  vertical-align: middle;
+}
+
+.readings-table tbody tr {
+  transition: background 150ms ease;
+}
+
+.readings-table tbody tr:hover {
+  background: rgba(117, 220, 232, 0.035);
+}
+
+.readings-table td:first-child {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.readings-table td:nth-child(2) {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.readings-table td:last-child {
+  white-space: nowrap;
+}
+
+.readings-table button,
+.reading-action {
+  min-height: 29px;
+  padding: 5px 9px;
+  margin-right: 5px;
+  border: 1px solid #35465b;
+  border-radius: 7px;
+  background: #17263a;
+  color: var(--cyan);
+  font: inherit;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 150ms ease, background 150ms ease;
+}
+
+.readings-table button:hover,
+.reading-action:hover {
+  border-color: var(--cyan);
+  background: rgba(117, 220, 232, 0.08);
+}
+
+.readings-table button[data-action="delete"],
+.readings-table .delete-reading {
+  color: var(--danger);
+}
+
+.readings-table button[data-action="delete"]:hover,
+.readings-table .delete-reading:hover {
+  border-color: rgba(251, 113, 133, 0.7);
+  background: rgba(251, 113, 133, 0.08);
+}
+
+.readings-table .empty-state,
+.readings-table td[colspan] {
+  padding: 28px 16px;
+  color: var(--muted);
+  text-align: center;
+  line-height: 1.8;
+}
+
+.readings-panel .tiny-note {
+  margin-top: 12px;
+}
+
+#exportReadings {
+  min-height: 38px;
+}
+
+#readingForm button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Responsive readings layout */
+@media (max-width: 900px) {
+  .readings-panel .bill-form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .readings-panel .calculate-button {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  .readings-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .readings-toolbar #exportReadings,
+  #exportReadings {
+    width: 100%;
+  }
+
+  .readings-panel .bill-form {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 13px;
+    gap: 13px;
+  }
+
+  .readings-panel .calculate-button {
+    grid-column: auto;
+    width: 100%;
+  }
+
+  .readings-summary {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .readings-table {
+    min-width: 520px;
+  }
+
+  .readings-table th,
+  .readings-table td {
+    padding: 11px 12px;
+  }
+}
