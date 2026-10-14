@@ -4,6 +4,11 @@
 
 Lumora is a web-based electricity consumption analytics dashboard designed to help users understand energy usage, estimate electricity bills, and explore consumption patterns.
 
+## 📸 Dashboard Preview
+
+![Lumora Dashboard](lumora-dashboard.png)
+
+
 ## ✨ Features
 
 - 📊 Electricity consumption visualization
