@@ -60,21 +60,20 @@
       letter-spacing: -1px;
     }
 
-    .mark {
-      display: grid;
-      place-items: center;
+    .brand-logo {
       width: 56px;
       height: 56px;
-      border-radius: 17px;
-      background: linear-gradient(135deg, #35d7e8, #8185ff);
-      color: #061525;
-      font-size: 30px;
+      object-fit: contain;
+      border-radius: 14px;
+      display: block;
+      flex-shrink: 0;
     }
 
     .brand-name {
       background: linear-gradient(90deg, #fff 55%, #43d8e7);
       color: transparent;
       background-clip: text;
+      -webkit-background-clip: text;
     }
 
     .tagline {
@@ -293,6 +292,11 @@
         font-size: 29px;
       }
 
+      .brand-logo {
+        width: 48px;
+        height: 48px;
+      }
+
       .names {
         grid-template-columns: 1fr;
         gap: 0;
@@ -309,7 +313,11 @@
   <main class="wrap">
 
     <div class="brand">
-      <div class="mark" aria-hidden="true">L</div>
+      <img
+        src="./lumora-logo.png"
+        alt="Lumora Logo"
+        class="brand-logo"
+      >
       <span class="brand-name">Lumora</span>
     </div>
 
@@ -336,73 +344,31 @@
           <div class="names" id="nameFields">
             <div class="field">
               <label for="firstName">First name</label>
-              <input
-                id="firstName"
-                name="firstName"
-                autocomplete="given-name"
-                maxlength="60"
-                placeholder="First name"
-                required
-              >
+              <input id="firstName" name="firstName" autocomplete="given-name" maxlength="60" placeholder="First name" required>
             </div>
 
             <div class="field">
               <label for="lastName">Last name</label>
-              <input
-                id="lastName"
-                name="lastName"
-                autocomplete="family-name"
-                maxlength="60"
-                placeholder="Last name"
-                required
-              >
+              <input id="lastName" name="lastName" autocomplete="family-name" maxlength="60" placeholder="Last name" required>
             </div>
           </div>
 
           <div class="field">
             <label for="email">Email address</label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              autocomplete="email"
-              maxlength="254"
-              placeholder="you@example.com"
-              required
-            >
+            <input id="email" name="email" type="email" autocomplete="email" maxlength="254" placeholder="you@example.com" required>
           </div>
 
           <div class="field">
             <label for="password">Password</label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              autocomplete="new-password"
-              minlength="8"
-              placeholder="Create a password"
-              required
-            >
-            <div class="hint" id="passwordHint">
-              Use at least 8 characters.
-            </div>
+            <input id="password" name="password" type="password" autocomplete="new-password" minlength="8" placeholder="Create a password" required>
+            <div class="hint" id="passwordHint">Use at least 8 characters.</div>
           </div>
 
-          <div
-            id="forgotWrap"
-            style="text-align:right;margin:-5px 0 18px;font-size:13px"
-            hidden
-          >
-            <a
-              href="#"
-              id="forgotLink"
-              style="color:#39d9e8;text-decoration:none"
-            >Forgot password?</a>
+          <div id="forgotWrap" style="text-align:right;margin:-5px 0 18px;font-size:13px" hidden>
+            <a href="#" id="forgotLink" style="color:#39d9e8;text-decoration:none">Forgot password?</a>
           </div>
 
-          <button id="submitButton" type="submit">
-            Create account
-          </button>
+          <button id="submitButton" type="submit">Create account</button>
 
         </form>
       </div>
@@ -414,8 +380,7 @@
 
         <p class="intro">
           We’ve sent a verification link to the email address below.
-          Open that message and click the verification link to activate
-          your Lumora account.
+          Open that message and click the verification link to activate your Lumora account.
         </p>
 
         <div class="email-highlight" id="sentEmail"></div>
@@ -430,20 +395,13 @@
           After verification, return to Lumora and log in with your email and password.
         </p>
 
-        <a class="primary" href="./auth.html?mode=login">
-          Back to login
-        </a>
+        <a class="primary" href="./auth.html?mode=login">Back to login</a>
 
         <button type="button" id="resendButton" class="secondary">
           Resend verification email
         </button>
 
-        <div
-          class="hint"
-          id="resendHint"
-          role="status"
-          aria-live="polite"
-        ></div>
+        <div class="hint" id="resendHint" role="status" aria-live="polite"></div>
       </div>
 
     </section>
@@ -461,7 +419,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="./supabase-config.js"></script>
-  <script src="./auth.js?v=20261015fix"></script>
+  <script src="./auth.js?v=20261015logo"></script>
 
 </body>
 </html>
