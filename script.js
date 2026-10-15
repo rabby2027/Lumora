@@ -1,4 +1,3 @@
-
 /* =========================================================
    LUMORA — Energy Analytics Dashboard
    Personal readings + cautious energy insights
@@ -6,7 +5,129 @@
 
 'use strict';
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  // Authenticate before initializing the dashboard or loading private data.
+  const config = window.LUMORA_SUPABASE_CONFIG;
+  if (!config || !window.supabase || !window.supabase.createClient) {
+    alert('Lumora could not load its authentication configuration. Please refresh the page.');
+    window.location.replace('./auth.html');
+    return;
+  }
+
+  const supabaseClient = window.supabase.createClient(
+    config.url,
+    config.publishableKey,
+    {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true
+      }
+    }
+  );
+
+  const { data: sessionData, error: sessionError } =
+    await supabaseClient.auth.getSession();
+
+  if (sessionError || !sessionData.session) {
+    window.location.replace('./auth.html');
+    return;
+  }
+
+  const currentUser = sessionData.session.user;
+  window.LUMORA_AUTH = { supabase: supabaseClient, user: currentUser };
+
+  // Add a visible account identity and Logout action to the existing top bar.
+  const accountArea = document.querySelector('.topbar-right');
+  if (accountArea && !document.getElementById('lumoraLogout')) {
+    const account = document.createElement('div');
+    account.style.cssText = 'display:flex;align-items:center;gap:10px;flex-wrap:wrap;';
+    const email = document.createElement('span');
+    email.textContent = currentUser.email || 'Lumora account';
+    email.style.cssText = 'color:#b9c6d8;font-size:12px;max-width:220px;overflow-wrap:anywhere;';
+    const logout = document.createElement('button');
+    logout.id = 'lumoraLogout';
+    logout.type = 'button';
+    logout.textContent = 'Logout';
+    logout.style.cssText = 'border:1px solid #26384f;background:#101d30;color:#f1f7ff;border-radius:9px;padding:8px 12px;cursor:pointer;font:inherit;font-size:12px;';
+    logout.addEventListener('click', async () => {
+      logout.disabled = true;
+      logout.textContent = 'Logging out…';
+      const { error } = await supabaseClient.auth.signOut();
+      if (error) {
+        logout.disabled = false;
+        logout.textContent = 'Logout';
+        alert('Logout failed. Please try again.');
+        return;
+      }
+      window.location.replace('./auth.html');
+    });
+    account.append(email, logout);
+    accountArea.appendChild(account);
+  }
+
+  // Load this user's rows only. RLS is the server-side security boundary.
+  let remoteRows = [];
+  const { data: initialRows, error: loadError } = await supabaseClient
+    .from('lumora_readings')
+    .select('id, reading_date, units')
+    .eq('user_id', currentUser.id)
+    .order('reading_date', { ascending: false });
+
+  if (loadError) {
+    alert('Could not load your cloud readings. Check that the lumora_readings table and RLS policies were created successfully.');
+    return;
+  }
+
+  remoteRows = initialRows || [];
+
+  const legacyKey = 'lumora-personal-readings-v1';
+  const userStorageKey = `${legacyKey}-${currentUser.id}`;
+
+  // Import legacy browser readings only when this account has no cloud rows.
+  // Ask first so data is never silently transferred to an account.
+  if (remoteRows.length === 0) {
+    try {
+      const legacyRows = JSON.parse(localStorage.getItem(legacyKey) || '[]');
+      if (Array.isArray(legacyRows) && legacyRows.length > 0 &&
+          window.confirm(`Lumora found ${legacyRows.length} older reading(s) saved in this browser. Import them into the currently signed-in account? Choose Cancel to keep this account empty.`)) {
+        const validLegacyRows = legacyRows
+          .filter(item => item && /^\d{4}-\d{2}-\d{2}$/.test(String(item.date)) &&
+            Number.isFinite(Number(item.units)) && Number(item.units) > 0)
+          .map(item => ({
+            user_id: currentUser.id,
+            reading_date: item.date,
+            units: Number(item.units)
+          }));
+        if (validLegacyRows.length) {
+          const { error: importError } = await supabaseClient
+            .from('lumora_readings')
+            .insert(validLegacyRows);
+          if (importError) {
+            alert('The old readings could not be imported. Your browser copy has not been deleted.');
+          } else {
+            const { data: importedRows, error: reloadError } = await supabaseClient
+              .from('lumora_readings')
+              .select('id, reading_date, units')
+              .eq('user_id', currentUser.id)
+              .order('reading_date', { ascending: false });
+            if (!reloadError) remoteRows = importedRows || [];
+          }
+        }
+      }
+    } catch (error) {
+      console.warn('Lumora could not inspect legacy readings for import:', error);
+    }
+  }
+
+  // Store a user-scoped local cache; cloud remains the source of truth.
+  const mapCloudRows = rows => (rows || []).map(row => ({
+    id: String(row.id),
+    date: row.reading_date,
+    units: Number(row.units)
+  }));
+  localStorage.setItem(userStorageKey, JSON.stringify(mapCloudRows(remoteRows)));
+
   const $ = (selector, root = document) => root.querySelector(selector);
   const $$ = (selector, root = document) =>
     Array.from(root.querySelectorAll(selector));
@@ -176,10 +297,10 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ---------------------------------------------------------
-  // My Readings — browser local storage
+  // My Readings — authenticated Supabase database
   // ---------------------------------------------------------
 
-  const STORAGE_KEY = 'lumora-personal-readings-v1';
+  const STORAGE_KEY = `lumora-personal-readings-v1-${currentUser.id}`;
 
   const readingForm = $('#readingForm');
   const readingDate = $('#readingDate');
@@ -188,31 +309,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const readingsTableBody = $('#readingsTableBody');
   const exportReadings = $('#exportReadings');
 
-  let readings = [];
+  let readings = mapCloudRows(remoteRows);
   let editingId = null;
-
-  try {
-    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-
-    if (Array.isArray(saved)) {
-      readings = saved
-        .filter((item) =>
-          item &&
-          typeof item.date === 'string' &&
-          /^\d{4}-\d{2}-\d{2}$/.test(item.date) &&
-          Number.isFinite(Number(item.units)) &&
-          Number(item.units) > 0
-        )
-        .map((item) => ({
-          id: String(item.id || `${Date.now()}-${Math.random()}`),
-          date: item.date,
-          units: Number(item.units)
-        }));
-    }
-  } catch (error) {
-    console.warn('Lumora could not read saved readings:', error);
-    readings = [];
-  }
 
   if (readingDate && !readingDate.value) {
     readingDate.value = localDate();
@@ -222,8 +320,7 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(readings));
     } catch (error) {
-      console.error('Lumora could not save readings:', error);
-      showToast('Could not save data in this browser.');
+      console.warn('Lumora could not update its local cache:', error);
     }
   };
 
@@ -740,7 +837,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // ---------------------------------------------------------
 
   if (readingForm && readingDate && readingUnits) {
-    readingForm.addEventListener('submit', (event) => {
+    readingForm.addEventListener('submit', async (event) => {
       event.preventDefault();
 
       const date = readingDate.value;
@@ -758,25 +855,55 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      if (editingId) {
-        readings = readings.map((item) =>
-          item.id === editingId ? { ...item, date, units } : item
-        );
+      const submitButton = $('button[type="submit"]', readingForm);
+      if (submitButton) submitButton.disabled = true;
 
-        showToast('Reading updated.');
-      } else {
-        readings.push({
-          id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-          date,
-          units
-        });
+      try {
+        if (editingId) {
+          const { data, error } = await supabaseClient
+            .from('lumora_readings')
+            .update({ reading_date: date, units })
+            .eq('id', editingId)
+            .eq('user_id', currentUser.id)
+            .select('id, reading_date, units')
+            .single();
 
-        showToast('Reading added.');
+          if (error) throw error;
+
+          readings = readings.map(item => item.id === editingId
+            ? { id: String(data.id), date: data.reading_date, units: Number(data.units) }
+            : item);
+          showToast('Reading updated in your account.');
+        } else {
+          const { data, error } = await supabaseClient
+            .from('lumora_readings')
+            .insert({
+              user_id: currentUser.id,
+              reading_date: date,
+              units
+            })
+            .select('id, reading_date, units')
+            .single();
+
+          if (error) throw error;
+
+          readings.push({
+            id: String(data.id),
+            date: data.reading_date,
+            units: Number(data.units)
+          });
+          showToast('Reading saved to your account.');
+        }
+
+        saveReadings();
+        refreshAll();
+        resetReadingForm();
+      } catch (error) {
+        console.error('Lumora reading save failed:', error);
+        showToast('Could not save to cloud. Please try again.');
+      } finally {
+        if (submitButton) submitButton.disabled = false;
       }
-
-      saveReadings();
-      refreshAll();
-      resetReadingForm();
     });
   }
 
@@ -785,7 +912,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // ---------------------------------------------------------
 
   if (readingsTableBody) {
-    readingsTableBody.addEventListener('click', (event) => {
+    readingsTableBody.addEventListener('click', async (event) => {
       const button = event.target.closest('button[data-action]');
       if (!button) return;
 
@@ -823,18 +950,28 @@ document.addEventListener('DOMContentLoaded', () => {
           return;
         }
 
-        readings = readings.filter(
-          (reading) => reading.id !== item.id
-        );
+        try {
+          const { error } = await supabaseClient
+            .from('lumora_readings')
+            .delete()
+            .eq('id', item.id)
+            .eq('user_id', currentUser.id);
 
-        saveReadings();
-        refreshAll();
+          if (error) throw error;
 
-        if (editingId === item.id) {
-          resetReadingForm();
+          readings = readings.filter(reading => reading.id !== item.id);
+          saveReadings();
+          refreshAll();
+
+          if (editingId === item.id) {
+            resetReadingForm();
+          }
+
+          showToast('Reading deleted from your account.');
+        } catch (error) {
+          console.error('Lumora reading delete failed:', error);
+          showToast('Could not delete from cloud. Please try again.');
         }
-
-        showToast('Reading deleted.');
       }
     });
   }
