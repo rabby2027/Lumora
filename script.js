@@ -1,14 +1,15 @@
 
 /* =========================================================
    LUMORA — Energy Analytics Dashboard
-   Real analytics based on saved personal readings
+   Personal readings + real rule-based energy insights
    ========================================================= */
 
 'use strict';
 
 document.addEventListener('DOMContentLoaded', () => {
   const $ = (selector, root = document) => root.querySelector(selector);
-  const $$ = (selector, root = document) => Array.from(root.querySelectorAll(selector));
+  const $$ = (selector, root = document) =>
+    Array.from(root.querySelectorAll(selector));
 
   const money = (value) =>
     new Intl.NumberFormat('en-BD', {
@@ -30,8 +31,6 @@ document.addEventListener('DOMContentLoaded', () => {
     return new Date(year, month - 1, day);
   };
 
-  const dateKey = (date) => localDate(date);
-
   const escapeHTML = (value) =>
     String(value).replace(/[&<>"']/g, (char) => ({
       '&': '&amp;',
@@ -40,6 +39,13 @@ document.addEventListener('DOMContentLoaded', () => {
       '"': '&quot;',
       "'": '&#39;'
     }[char]));
+
+  const formatDate = (value) =>
+    new Intl.DateTimeFormat('en-BD', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
+    }).format(parseDate(value));
 
   // ---------------------------------------------------------
   // Date chip
@@ -57,7 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ---------------------------------------------------------
-  // Toast notification
+  // Toast notifications
   // ---------------------------------------------------------
 
   let toastTimeout;
@@ -77,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   // ---------------------------------------------------------
-  // Mobile sidebar and navigation
+  // Navigation and mobile sidebar
   // ---------------------------------------------------------
 
   const sidebar = $('#sidebar');
@@ -164,7 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ---------------------------------------------------------
-  // Personal readings and local storage
+  // Personal readings: localStorage
   // ---------------------------------------------------------
 
   const STORAGE_KEY = 'lumora-personal-readings-v1';
@@ -220,6 +226,22 @@ document.addEventListener('DOMContentLoaded', () => {
       b.date.localeCompare(a.date) || b.id.localeCompare(a.id)
     );
 
+  // Group multiple entries on the same date into one daily total.
+  const getDailyTotals = () => {
+    const totals = new Map();
+
+    readings.forEach((item) => {
+      totals.set(
+        item.date,
+        (totals.get(item.date) || 0) + item.units
+      );
+    });
+
+    return [...totals.entries()]
+      .map(([date, units]) => ({ date, units }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+  };
+
   const renderReadings = () => {
     if (!readingsTableBody || !readingsSummary) return;
 
@@ -265,7 +287,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const submitButton = $('button[type="submit"]', readingForm);
 
       if (submitButton) {
-        submitButton.innerHTML = 'Add reading <span aria-hidden="true">＋</span>';
+        submitButton.innerHTML =
+          'Add reading <span aria-hidden="true">＋</span>';
       }
     }
 
@@ -275,7 +298,7 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   // ---------------------------------------------------------
-  // Real analytics: aggregate actual saved readings
+  // Energy usage chart
   // ---------------------------------------------------------
 
   const chartCanvas = $('#usageChart');
@@ -284,15 +307,18 @@ document.addEventListener('DOMContentLoaded', () => {
   const rangeButtons = $$('.range-btn');
 
   let usageChart = null;
-  let currentRange = 'week';
+  let currentRange = 'day';
 
-  // Week starts on Monday.
   const startOfWeek = (date) => {
     const result = new Date(date.getFullYear(), date.getMonth(), date.getDate());
     const day = result.getDay();
+
     result.setDate(result.getDate() - (day === 0 ? 6 : day - 1));
+
     return result;
   };
+
+  const dateKey = (date) => localDate(date);
 
   const formatShortDate = (date) =>
     new Intl.DateTimeFormat('en', {
@@ -308,22 +334,20 @@ document.addEventListener('DOMContentLoaded', () => {
       today.getDate()
     );
 
-    const data = [];
+    const buckets = [];
 
     if (range === 'day') {
-      // Last seven calendar days, including today.
       for (let i = 6; i >= 0; i--) {
         const date = new Date(todayStart);
         date.setDate(date.getDate() - i);
 
-        data.push({
+        buckets.push({
           key: dateKey(date),
           label: formatShortDate(date),
           value: 0
         });
       }
     } else if (range === 'week') {
-      // Current week plus seven previous weeks.
       const currentMonday = startOfWeek(todayStart);
 
       for (let i = 7; i >= 0; i--) {
@@ -333,7 +357,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const end = new Date(start);
         end.setDate(end.getDate() + 7);
 
-        data.push({
+        buckets.push({
           start,
           end,
           label: formatShortDate(start),
@@ -341,7 +365,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       }
     } else if (range === 'month') {
-      // Current month plus five previous months.
       for (let i = 5; i >= 0; i--) {
         const start = new Date(
           today.getFullYear(),
@@ -355,7 +378,7 @@ document.addEventListener('DOMContentLoaded', () => {
           1
         );
 
-        data.push({
+        buckets.push({
           start,
           end,
           label: new Intl.DateTimeFormat('en', {
@@ -367,16 +390,18 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    // Put each saved reading into the matching date/week/month.
     readings.forEach((reading) => {
       const date = parseDate(reading.date);
 
       if (range === 'day') {
-        const bucket = data.find((item) => item.key === reading.date);
+        const bucket = buckets.find(
+          (item) => item.key === reading.date
+        );
+
         if (bucket) bucket.value += reading.units;
       } else {
-        const bucket = data.find((item) =>
-          date >= item.start && date < item.end
+        const bucket = buckets.find(
+          (item) => date >= item.start && date < item.end
         );
 
         if (bucket) bucket.value += reading.units;
@@ -384,8 +409,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     return {
-      labels: data.map((item) => item.label),
-      values: data.map((item) => Number(item.value.toFixed(2)))
+      labels: buckets.map((item) => item.label),
+      values: buckets.map((item) => Number(item.value.toFixed(2)))
     };
   };
 
@@ -395,8 +420,8 @@ document.addEventListener('DOMContentLoaded', () => {
     month: 'Monthly usage · last 6 months'
   };
 
-  const updateChartTotal = (range) => {
-    const data = getChartData(range);
+  const updateChart = () => {
+    const data = getChartData(currentRange);
     const total = data.values.reduce((sum, value) => sum + value, 0);
 
     if (chartTotal) {
@@ -404,25 +429,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (chartCaption) {
-      chartCaption.textContent = rangeCaptions[range];
+      chartCaption.textContent = rangeCaptions[currentRange];
     }
 
-    return data;
-  };
-
-  const setActiveRangeButtons = (range) => {
     rangeButtons.forEach((button) => {
-      const active = button.dataset.range === range;
+      const active = button.dataset.range === currentRange;
 
       button.classList.toggle('active', active);
       button.setAttribute('aria-pressed', String(active));
     });
-  };
-
-  const refreshAnalyticsChart = () => {
-    const data = updateChartTotal(currentRange);
-
-    setActiveRangeButtons(currentRange);
 
     if (usageChart) {
       usageChart.data.labels = data.labels;
@@ -431,16 +446,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  const setChartRange = (range) => {
-    if (!['day', 'week', 'month'].includes(range)) return;
-
-    currentRange = range;
-    refreshAnalyticsChart();
-  };
-
   rangeButtons.forEach((button) => {
     button.addEventListener('click', () => {
-      setChartRange(button.dataset.range);
+      const range = button.dataset.range;
+
+      if (!['day', 'week', 'month'].includes(range)) return;
+
+      currentRange = range;
+      updateChart();
     });
   });
 
@@ -481,9 +494,7 @@ document.addEventListener('DOMContentLoaded', () => {
             mode: 'index'
           },
           plugins: {
-            legend: {
-              display: false
-            },
+            legend: { display: false },
             tooltip: {
               backgroundColor: '#111c2e',
               titleColor: '#f3f7fb',
@@ -499,17 +510,11 @@ document.addEventListener('DOMContentLoaded', () => {
           },
           scales: {
             x: {
-              grid: {
-                display: false
-              },
-              border: {
-                display: false
-              },
+              grid: { display: false },
+              border: { display: false },
               ticks: {
                 color: '#91a2b8',
-                font: {
-                  family: 'DM Sans'
-                }
+                font: { family: 'DM Sans' }
               }
             },
             y: {
@@ -524,9 +529,7 @@ document.addEventListener('DOMContentLoaded', () => {
               ticks: {
                 color: '#91a2b8',
                 padding: 8,
-                font: {
-                  family: 'DM Sans'
-                }
+                font: { family: 'DM Sans' }
               }
             }
           }
@@ -538,7 +541,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ---------------------------------------------------------
-  // Dashboard summary: saved readings, not demo values
+  // Dashboard summary based on personal readings
   // ---------------------------------------------------------
 
   const totalCost = $('#totalCost');
@@ -547,6 +550,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const updateDashboardSummary = () => {
     const total = readings.reduce((sum, item) => sum + item.units, 0);
+    const dailyTotals = getDailyTotals();
     const tariff = Number(tariffInput?.value);
 
     const validTariff =
@@ -554,8 +558,6 @@ document.addEventListener('DOMContentLoaded', () => {
       tariffInput.value.trim() !== '' &&
       Number.isFinite(tariff) &&
       tariff >= 0;
-
-    const dates = [...new Set(readings.map((item) => item.date))];
 
     if (totalUsage) {
       totalUsage.textContent = number(total, 2);
@@ -570,22 +572,176 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (dailyAverage) {
       dailyAverage.textContent = number(
-        dates.length ? total / dates.length : 0,
+        dailyTotals.length ? total / dailyTotals.length : 0,
         2
       );
     }
   };
 
-  const refreshAllAnalytics = () => {
-    renderReadings();
-    refreshAnalyticsChart();
-    updateDashboardSummary();
-  };
-
-  // Update estimate if the tariff changes.
   if (tariffInput) {
     tariffInput.addEventListener('input', updateDashboardSummary);
   }
+
+  // ---------------------------------------------------------
+  // Smart Energy Insights — rule-based, saved data only
+  // ---------------------------------------------------------
+
+  const insightsPanel = $('#insights');
+  const insightsBadge = $('.insights-label', insightsPanel);
+  const insightItems = $$('.insight-item', insightsPanel);
+  const insightsFooter = $('.insights-footer', insightsPanel);
+
+  const renderInsights = () => {
+    if (insightItems.length < 3) return;
+
+    const dailyTotals = getDailyTotals();
+    const total = readings.reduce((sum, item) => sum + item.units, 0);
+    const uniqueDays = dailyTotals.length;
+    const average = uniqueDays ? total / uniqueDays : 0;
+
+    const newest = dailyTotals[dailyTotals.length - 1];
+    const previous = dailyTotals[dailyTotals.length - 2];
+
+    // Card 1: Compare the latest two recorded dates.
+    let comparisonTitle = 'Compare your readings';
+    let comparisonText =
+      'Add readings from at least two different dates to compare daily electricity use.';
+    let comparisonType = 'WAITING FOR DATA';
+    let comparisonIcon = '↔';
+
+    if (newest && previous) {
+      const difference = newest.units - previous.units;
+      const percent = previous.units > 0
+        ? Math.abs(difference / previous.units) * 100
+        : null;
+
+      if (difference > 0) {
+        comparisonTitle = 'Usage increased';
+        comparisonText = percent === null
+          ? `Your latest recorded day used ${number(difference, 2)} kWh more than the previous recorded day.`
+          : `Usage rose by ${number(percent, 1)}% from ${number(previous.units, 2)} kWh on ${formatDate(previous.date)} to ${number(newest.units, 2)} kWh on ${formatDate(newest.date)}.`;
+        comparisonType = 'RECORDED-DAY COMPARISON';
+        comparisonIcon = '↗';
+      } else if (difference < 0) {
+        comparisonTitle = 'Usage decreased';
+        comparisonText = percent === null
+          ? `Your latest recorded day used ${number(Math.abs(difference), 2)} kWh less than the previous recorded day.`
+          : `Usage fell by ${number(percent, 1)}% from ${number(previous.units, 2)} kWh on ${formatDate(previous.date)} to ${number(newest.units, 2)} kWh on ${formatDate(newest.date)}.`;
+        comparisonType = 'RECORDED-DAY COMPARISON';
+        comparisonIcon = '↘';
+      } else {
+        comparisonTitle = 'Usage stayed the same';
+        comparisonText =
+          `Both recorded days show ${number(newest.units, 2)} kWh of usage. Keep recording readings to follow your trend.`;
+        comparisonType = 'RECORDED-DAY COMPARISON';
+        comparisonIcon = '→';
+      }
+    } else if (newest) {
+      comparisonTitle = 'First recorded day';
+      comparisonText =
+        `Your saved data shows ${number(newest.units, 2)} kWh on ${formatDate(newest.date)}. Add another date to compare usage.`;
+      comparisonType = 'EARLY DATA';
+      comparisonIcon = '•';
+    } else {
+      comparisonTitle = 'Start tracking your energy';
+      comparisonText =
+        'No personal readings are saved yet. Add a date and kWh value in My Readings to begin.';
+      comparisonType = 'NO PERSONAL DATA';
+      comparisonIcon = '+';
+    }
+
+    // Card 2: Summarize the user's saved readings.
+    let summaryTitle = 'Your usage summary';
+    let summaryText =
+      'Your saved readings will be summarized here.';
+    let summaryType = 'PERSONAL SUMMARY';
+    let summaryIcon = '◷';
+
+    if (uniqueDays > 0) {
+      summaryTitle = 'Your recorded usage';
+      summaryText =
+        `${number(total, 2)} kWh across ${uniqueDays} recorded ${uniqueDays === 1 ? 'day' : 'days'}. Average: ${number(average, 2)} kWh per recorded day.`;
+      summaryType = 'SAVED PERSONAL DATA';
+      summaryIcon = '▤';
+    } else {
+      summaryTitle = 'No usage summary yet';
+      summaryText =
+        'Once you save readings, Lumora will calculate your total and average usage.';
+      summaryType = 'WAITING FOR DATA';
+      summaryIcon = '◷';
+    }
+
+    // Card 3: A cautious, rule-based recommendation.
+    let adviceTitle = 'Keep recording consistently';
+    let adviceText =
+      'Record usage on comparable days. More consistent data helps you spot meaningful changes.';
+    let adviceType = 'PRACTICAL TIP';
+    let adviceIcon = '✓';
+
+    if (uniqueDays < 2) {
+      adviceTitle = 'Build a useful history';
+      adviceText =
+        'Record readings on at least two different dates before drawing conclusions about increases or savings.';
+      adviceType = 'DATA QUALITY';
+      adviceIcon = '＋';
+    } else if (average > 10) {
+      adviceTitle = 'Review your daily usage';
+      adviceText =
+        `Your average is ${number(average, 2)} kWh per recorded day. Review high-consumption appliances and compare similar days before making changes.`;
+      adviceType = 'USAGE REVIEW';
+      adviceIcon = '!';
+    } else {
+      adviceTitle = 'Keep tracking your usage';
+      adviceText =
+        `Your average is ${number(average, 2)} kWh per recorded day. Continue recording comparable days to understand your normal usage pattern.`;
+      adviceType = 'PERSONALIZED TIP';
+      adviceIcon = '✓';
+    }
+
+    const cards = [
+      {
+        title: comparisonTitle,
+        text: comparisonText,
+        type: comparisonType,
+        icon: comparisonIcon
+      },
+      {
+        title: summaryTitle,
+        text: summaryText,
+        type: summaryType,
+        icon: summaryIcon
+      },
+      {
+        title: adviceTitle,
+        text: adviceText,
+        type: adviceType,
+        icon: adviceIcon
+      }
+    ];
+
+    cards.forEach((card, index) => {
+      const item = insightItems[index];
+      const icon = $('.insight-icon', item);
+      const title = $('h3', item);
+      const paragraph = $('p', item);
+      const type = $('.insight-type', item);
+
+      if (icon) icon.textContent = card.icon;
+      if (title) title.textContent = card.title;
+      if (paragraph) paragraph.textContent = card.text;
+      if (type) type.textContent = card.type;
+    });
+
+    if (insightsBadge) {
+      insightsBadge.textContent = uniqueDays ? 'PERSONAL DATA' : 'NO DATA';
+    }
+
+    if (insightsFooter) {
+      insightsFooter.textContent = uniqueDays
+        ? `Rule-based insights · ${uniqueDays} recorded ${uniqueDays === 1 ? 'day' : 'days'} · Stored in this browser`
+        : 'Add personal readings to generate insights';
+    }
+  };
 
   // ---------------------------------------------------------
   // Add and edit readings
@@ -612,9 +768,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (editingId) {
         readings = readings.map((item) =>
-          item.id === editingId
-            ? { ...item, date, units }
-            : item
+          item.id === editingId ? { ...item, date, units } : item
         );
 
         showToast('Reading updated.');
@@ -629,13 +783,13 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       saveReadings();
-      refreshAllAnalytics();
+      refreshAll();
       resetReadingForm();
     });
   }
 
   // ---------------------------------------------------------
-  // Edit and delete buttons
+  // Edit and delete controls
   // ---------------------------------------------------------
 
   if (readingsTableBody) {
@@ -682,7 +836,7 @@ document.addEventListener('DOMContentLoaded', () => {
         );
 
         saveReadings();
-        refreshAllAnalytics();
+        refreshAll();
 
         if (editingId === item.id) {
           resetReadingForm();
@@ -694,7 +848,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ---------------------------------------------------------
-  // Export readings to CSV
+  // CSV export
   // ---------------------------------------------------------
 
   if (exportReadings) {
@@ -738,14 +892,21 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ---------------------------------------------------------
-  // Initial render
+  // Refresh every data-dependent component
   // ---------------------------------------------------------
 
-  refreshAllAnalytics();
+  function refreshAll() {
+    renderReadings();
+    updateChart();
+    updateDashboardSummary();
+    renderInsights();
+  }
+
+  refreshAll();
 
   if (window.location.hash) {
     setActiveNav(window.location.hash);
   }
 
-  console.info('Lumora loaded. Analytics use saved personal readings.');
+  console.info('Lumora loaded. Personal insights use saved readings.');
 });
