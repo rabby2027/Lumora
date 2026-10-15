@@ -47,36 +47,79 @@ h1 span{color:#60e8ff}
 .unit{font-size:12px}
 .note{margin-top:4px;color:#8daabd;font-size:9px}
 
+/* Legend is positioned clearly above the footer */
 .legend{
-  position:absolute;bottom:66px;left:27px;z-index:2;
-  display:grid;gap:9px;color:#83a9bc;font-size:9px;
-  letter-spacing:.5px;pointer-events:none
+  position:absolute;
+  left:27px;
+  bottom:105px;
+  z-index:2;
+  display:grid;
+  gap:9px;
+  color:#83a9bc;
+  font-size:9px;
+  letter-spacing:.5px;
+  pointer-events:none
 }
-.legend span{display:flex;align-items:center;gap:7px}
+.legend span{
+  display:flex;
+  align-items:center;
+  gap:7px
+}
 .legend i{
-  width:16px;height:2px;flex-shrink:0;
-  display:inline-block;background:#29cfff;
+  width:16px;
+  height:2px;
+  flex-shrink:0;
+  display:inline-block;
+  background:#29cfff;
   box-shadow:0 0 5px #29cfff
 }
-.legend .bright{background:#8bfff0;box-shadow:0 0 5px #8bfff0}
-
-.footer{
-  position:absolute;bottom:25px;left:27px;right:27px;
-  z-index:2;display:flex;justify-content:space-between;
-  align-items:center;gap:12px;color:#83a9bc;
-  font-size:9px;letter-spacing:.6px;pointer-events:none
+.legend .bright{
+  background:#8bfff0;
+  box-shadow:0 0 5px #8bfff0
 }
-.live{display:flex;align-items:center;gap:7px;white-space:nowrap}
+
+/* Footer uses separate rows instead of overlapping columns */
+.footer{
+  position:absolute;
+  bottom:23px;
+  left:27px;
+  right:27px;
+  z-index:2;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:7px;
+  color:#83a9bc;
+  font-size:9px;
+  letter-spacing:.6px;
+  pointer-events:none
+}
+.live{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  white-space:nowrap
+}
 .dot{
-  width:6px;height:6px;flex-shrink:0;border-radius:50%;
-  background:#6effd7;box-shadow:0 0 8px #6effd7;
+  width:6px;
+  height:6px;
+  flex-shrink:0;
+  border-radius:50%;
+  background:#6effd7;
+  box-shadow:0 0 8px #6effd7;
   animation:blink 1.6s infinite
 }
-.footer span:last-child{text-align:right;white-space:nowrap}
+.footer span:last-child{
+  text-align:left;
+  white-space:nowrap
+}
 
 .frame{
-  position:absolute;inset:13px;z-index:4;
-  border:1px solid #4dc8ef30;border-radius:23px;
+  position:absolute;
+  inset:13px;
+  z-index:4;
+  border:1px solid #4dc8ef30;
+  border-radius:23px;
   pointer-events:none
 }
 @keyframes blink{50%{opacity:.45}}
@@ -88,8 +131,12 @@ h1 span{color:#60e8ff}
   .subtitle{font-size:9px}
 
   .metrics{
-    top:auto;right:17px;bottom:92px;
-    transform:none;width:122px;gap:7px
+    top:auto;
+    right:17px;
+    bottom:120px;
+    transform:none;
+    width:122px;
+    gap:7px
   }
   .metric{padding:9px;border-radius:10px}
   .label{font-size:8px;letter-spacing:.6px}
@@ -97,12 +144,21 @@ h1 span{color:#60e8ff}
   .note{font-size:8px}
 
   .legend{
-    left:20px;bottom:70px;gap:8px;font-size:8px
+    left:20px;
+    bottom:115px;
+    gap:8px;
+    font-size:8px
   }
+
   .footer{
-    left:20px;right:20px;bottom:25px;
-    font-size:8px;letter-spacing:.3px
+    left:20px;
+    right:20px;
+    bottom:23px;
+    gap:7px;
+    font-size:8px;
+    letter-spacing:.3px
   }
+
   .frame{inset:8px;border-radius:16px}
 }
 @media(prefers-reduced-motion:reduce){
@@ -144,6 +200,7 @@ h1 span{color:#60e8ff}
 
 <div class="footer">
   <span class="live"><i class="dot"></i> ROTATING PLANET</span>
+  <span>ENERGY NETWORK SIMULATION</span>
   <span>POWERING TOMORROW</span>
 </div>
 
@@ -255,7 +312,7 @@ const stars = new THREE.Points(
 );
 scene.add(stars);
 
-// Latitude-longitude globe mesh
+// Globe grid
 earthGroup.add(new THREE.Mesh(
   new THREE.SphereGeometry(R * 1.006, 36, 26),
   new THREE.MeshBasicMaterial({
@@ -362,16 +419,14 @@ function addCable(start, end, options = {}) {
 
   network.add(line);
 
-  if (options.pulse !== false) {
-    tracks.push({
-      points,
-      phase: Math.random(),
-      speed: 0.10 + Math.random() * 0.25
-    });
-  }
+  tracks.push({
+    points,
+    phase: Math.random(),
+    speed: 0.10 + Math.random() * 0.25
+  });
 }
 
-// Wire density reduced; ball settings are unchanged
+// Balanced grid density
 const rows = 14;
 const cols = 26;
 const grid = [];
@@ -388,7 +443,7 @@ for (let row = 0; row <= rows; row++) {
   grid.push(points);
 }
 
-// Grid cables and diagonal cross-links
+// Grid wires and selected diagonal connections
 for (let row = 0; row <= rows; row++) {
   for (let col = 0; col < cols; col++) {
     const next = (col + 1) % cols;
@@ -414,7 +469,7 @@ for (let row = 0; row <= rows; row++) {
   }
 }
 
-// Energy hubs
+// Regional energy hubs
 const hubSpecs = [
   [40,-74],[51.5,-0.1],[24.9,67],[23.8,90.4],
   [35.7,139.7],[19,72.8],[-33.9,151.2],[1.3,103.8],
@@ -429,7 +484,7 @@ const hubs = hubSpecs.map(([lat, lon]) =>
   pointOnSphere(lat, lon, R * 1.025)
 );
 
-// Ball geometry, colour, size and animation remain unchanged
+// Glowing balls unchanged
 const nodeGeometry = new THREE.SphereGeometry(0.022, 7, 7);
 const nodeMaterial = new THREE.MeshBasicMaterial({
   color: 0x8bf6ff
@@ -480,7 +535,7 @@ for (let i = 0; i < 43; i++) {
   });
 }
 
-// Pulses remain unchanged
+// Energy pulses unchanged
 const pulseGeometry = new THREE.SphereGeometry(0.016, 6, 6);
 const pulseMaterial = new THREE.MeshBasicMaterial({
   color: 0x9bfff5
@@ -526,8 +581,7 @@ function animate() {
 
     item.mesh.position.copy(
       item.points[index].clone().lerp(
-        item.points[next],
-        fraction
+        item.points[next], fraction
       )
     );
   });
