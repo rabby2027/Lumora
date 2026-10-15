@@ -8,6 +8,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
   // Authenticate before initializing the dashboard or loading private data.
   const config = window.LUMORA_SUPABASE_CONFIG;
+
   if (!config || !window.supabase || !window.supabase.createClient) {
     alert('Lumora could not load its authentication configuration. Please refresh the page.');
     window.location.replace('./auth.html');
@@ -35,39 +36,56 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   const currentUser = sessionData.session.user;
-  window.LUMORA_AUTH = { supabase: supabaseClient, user: currentUser };
 
-  // Add a visible account identity and Logout action to the existing top bar.
+  window.LUMORA_AUTH = {
+    supabase: supabaseClient,
+    user: currentUser
+  };
+
+  // Account identity and logout
   const accountArea = document.querySelector('.topbar-right');
+
   if (accountArea && !document.getElementById('lumoraLogout')) {
     const account = document.createElement('div');
-    account.style.cssText = 'display:flex;align-items:center;gap:10px;flex-wrap:wrap;';
+
+    account.style.cssText =
+      'display:flex;align-items:center;gap:10px;flex-wrap:wrap;';
+
     const email = document.createElement('span');
     email.textContent = currentUser.email || 'Lumora account';
-    email.style.cssText = 'color:#b9c6d8;font-size:12px;max-width:220px;overflow-wrap:anywhere;';
+    email.style.cssText =
+      'color:#b9c6d8;font-size:12px;max-width:220px;overflow-wrap:anywhere;';
+
     const logout = document.createElement('button');
     logout.id = 'lumoraLogout';
     logout.type = 'button';
     logout.textContent = 'Logout';
-    logout.style.cssText = 'border:1px solid #26384f;background:#101d30;color:#f1f7ff;border-radius:9px;padding:8px 12px;cursor:pointer;font:inherit;font-size:12px;';
+    logout.style.cssText =
+      'border:1px solid #26384f;background:#101d30;color:#f1f7ff;border-radius:9px;padding:8px 12px;cursor:pointer;font:inherit;font-size:12px;';
+
     logout.addEventListener('click', async () => {
       logout.disabled = true;
       logout.textContent = 'Logging out…';
+
       const { error } = await supabaseClient.auth.signOut();
+
       if (error) {
         logout.disabled = false;
         logout.textContent = 'Logout';
         alert('Logout failed. Please try again.');
         return;
       }
+
       window.location.replace('./auth.html');
     });
+
     account.append(email, logout);
     accountArea.appendChild(account);
   }
 
-  // Load this user's rows only. RLS is the server-side security boundary.
+  // Load only the signed-in user's readings.
   let remoteRows = [];
+
   const { data: initialRows, error: loadError } = await supabaseClient
     .from('lumora_readings')
     .select('id, reading_date, units')
@@ -75,7 +93,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     .order('reading_date', { ascending: false });
 
   if (loadError) {
-    alert('Could not load your cloud readings. Check that the lumora_readings table and RLS policies were created successfully.');
+    console.error('Lumora reading load failed:', loadError);
+    alert(
+      'Could not load your cloud readings. Check the lumora_readings table and RLS policies.'
+    );
     return;
   }
 
@@ -84,60 +105,93 @@ document.addEventListener('DOMContentLoaded', async () => {
   const legacyKey = 'lumora-personal-readings-v1';
   const userStorageKey = `${legacyKey}-${currentUser.id}`;
 
-  // Import legacy browser readings only when this account has no cloud rows.
-  // Ask first so data is never silently transferred to an account.
+  // Offer to import older browser readings, without deleting the original.
   if (remoteRows.length === 0) {
     try {
-      const legacyRows = JSON.parse(localStorage.getItem(legacyKey) || '[]');
-      if (Array.isArray(legacyRows) && legacyRows.length > 0 &&
-          window.confirm(`Lumora found ${legacyRows.length} older reading(s) saved in this browser. Import them into the currently signed-in account? Choose Cancel to keep this account empty.`)) {
+      const legacyRows = JSON.parse(
+        localStorage.getItem(legacyKey) || '[]'
+      );
+
+      if (
+        Array.isArray(legacyRows) &&
+        legacyRows.length > 0 &&
+        window.confirm(
+          `Lumora found ${legacyRows.length} older reading(s) saved in this browser. Import them into the currently signed-in account? Choose Cancel to keep this account empty.`
+        )
+      ) {
         const validLegacyRows = legacyRows
-          .filter(item => item && /^\d{4}-\d{2}-\d{2}$/.test(String(item.date)) &&
-            Number.isFinite(Number(item.units)) && Number(item.units) > 0)
+          .filter(item =>
+            item &&
+            /^\d{4}-\d{2}-\d{2}$/.test(String(item.date)) &&
+            Number.isFinite(Number(item.units)) &&
+            Number(item.units) > 0
+          )
           .map(item => ({
             user_id: currentUser.id,
             reading_date: item.date,
             units: Number(item.units)
           }));
+
         if (validLegacyRows.length) {
           const { error: importError } = await supabaseClient
             .from('lumora_readings')
             .insert(validLegacyRows);
+
           if (importError) {
-            alert('The old readings could not be imported. Your browser copy has not been deleted.');
+            alert(
+              'The old readings could not be imported. Your browser copy has not been deleted.'
+            );
           } else {
-            const { data: importedRows, error: reloadError } = await supabaseClient
-              .from('lumora_readings')
-              .select('id, reading_date, units')
-              .eq('user_id', currentUser.id)
-              .order('reading_date', { ascending: false });
-            if (!reloadError) remoteRows = importedRows || [];
+            const { data: importedRows, error: reloadError } =
+              await supabaseClient
+                .from('lumora_readings')
+                .select('id, reading_date, units')
+                .eq('user_id', currentUser.id)
+                .order('reading_date', { ascending: false });
+
+            if (!reloadError) {
+              remoteRows = importedRows || [];
+            }
           }
         }
       }
     } catch (error) {
-      console.warn('Lumora could not inspect legacy readings for import:', error);
+      console.warn(
+        'Lumora could not inspect legacy readings for import:',
+        error
+      );
     }
   }
 
-  // Store a user-scoped local cache; cloud remains the source of truth.
   const mapCloudRows = rows => (rows || []).map(row => ({
     id: String(row.id),
     date: row.reading_date,
     units: Number(row.units)
   }));
-  localStorage.setItem(userStorageKey, JSON.stringify(mapCloudRows(remoteRows)));
 
-  const $ = (selector, root = document) => root.querySelector(selector);
+  try {
+    localStorage.setItem(
+      userStorageKey,
+      JSON.stringify(mapCloudRows(remoteRows))
+    );
+  } catch (error) {
+    console.warn('Lumora local cache could not be updated:', error);
+  }
+
+  const $ = (selector, root = document) =>
+    root.querySelector(selector);
+
   const $$ = (selector, root = document) =>
     Array.from(root.querySelectorAll(selector));
 
-  const money = (value) =>
+  const money = value =>
     new Intl.NumberFormat('en-BD', {
       style: 'currency',
       currency: 'BDT',
       maximumFractionDigits: 2
-    }).format(Number(value) || 0).replace('BDT', '৳');
+    })
+      .format(Number(value) || 0)
+      .replace('BDT', '৳');
 
   const number = (value, digits = 1) =>
     new Intl.NumberFormat('en-US', {
@@ -147,13 +201,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   const localDate = (date = new Date()) =>
     `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 
-  const parseDate = (value) => {
+  const parseDate = value => {
     const [year, month, day] = value.split('-').map(Number);
     return new Date(year, month - 1, day);
   };
 
-  const escapeHTML = (value) =>
-    String(value).replace(/[&<>"']/g, (char) => ({
+  const escapeHTML = value =>
+    String(value).replace(/[&<>"']/g, char => ({
       '&': '&amp;',
       '<': '&lt;',
       '>': '&gt;',
@@ -161,7 +215,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       "'": '&#39;'
     }[char]));
 
-  const formatDate = (value) =>
+  const formatDate = value =>
     new Intl.DateTimeFormat('en-BD', {
       day: 'numeric',
       month: 'short',
@@ -170,14 +224,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const daysBetween = (first, second) =>
     Math.round(
-      (parseDate(second).getTime() - parseDate(first).getTime()) /
-      86400000
+      (parseDate(second).getTime() -
+        parseDate(first).getTime()) / 86400000
     );
 
-  // ---------------------------------------------------------
   // Date chip
-  // ---------------------------------------------------------
-
   const dateChip = $('#dateChip');
 
   if (dateChip) {
@@ -189,13 +240,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     }).format(new Date());
   }
 
-  // ---------------------------------------------------------
   // Toast notification
-  // ---------------------------------------------------------
-
   let toastTimeout;
 
-  const showToast = (message) => {
+  const showToast = message => {
     const toast = $('#toast');
     if (!toast) return;
 
@@ -209,10 +257,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }, 2800);
   };
 
-  // ---------------------------------------------------------
   // Navigation and mobile sidebar
-  // ---------------------------------------------------------
-
   const sidebar = $('#sidebar');
   const menuToggle = $('#menuToggle');
 
@@ -222,7 +267,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       menuToggle.setAttribute('aria-expanded', String(isOpen));
     });
 
-    $$('.nav-link', sidebar).forEach((link) => {
+    $$('.nav-link', sidebar).forEach(link => {
       link.addEventListener('click', () => {
         sidebar.classList.remove('open');
         menuToggle.setAttribute('aria-expanded', 'false');
@@ -232,8 +277,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const navLinks = $$('.nav-link');
 
-  const setActiveNav = (hash) => {
-    navLinks.forEach((link) => {
+  const setActiveNav = hash => {
+    navLinks.forEach(link => {
       const active = link.getAttribute('href') === hash;
 
       link.classList.toggle('active', active);
@@ -246,7 +291,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   };
 
-  navLinks.forEach((link) => {
+  navLinks.forEach(link => {
     link.addEventListener('click', () => {
       setActiveNav(link.getAttribute('href'));
     });
@@ -256,16 +301,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     setActiveNav(window.location.hash || '#overview');
   });
 
-  // ---------------------------------------------------------
   // Bill calculator
-  // ---------------------------------------------------------
-
   const billForm = $('#billForm');
   const unitsInput = $('#units');
   const tariffInput = $('#tariff');
   const estimatedBill = $('#estimatedBill');
 
-  const calculateBill = (event) => {
+  const calculateBill = event => {
     if (event) event.preventDefault();
 
     if (!unitsInput || !tariffInput) return;
@@ -295,8 +337,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (billForm) {
     billForm.addEventListener('submit', calculateBill);
   }
-
-  // ---------------------------------------------------------
+     // ---------------------------------------------------------
   // My Readings — authenticated Supabase database
   // ---------------------------------------------------------
 
@@ -320,20 +361,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(readings));
     } catch (error) {
-      console.warn('Lumora could not update its local cache:', error);
+      console.warn('Lumora local cache could not be updated:', error);
     }
   };
 
   const sortedReadings = () =>
-    [...readings].sort((a, b) =>
-      b.date.localeCompare(a.date) || b.id.localeCompare(a.id)
+    [...readings].sort(
+      (a, b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id)
     );
 
-  // Multiple entries from the same date are combined for comparisons.
+  // Combine multiple entries recorded on the same date.
   const getDailyTotals = () => {
     const totals = new Map();
 
-    readings.forEach((item) => {
+    readings.forEach(item => {
       totals.set(
         item.date,
         (totals.get(item.date) || 0) + item.units
@@ -361,7 +402,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
 
-    readingsTableBody.innerHTML = sorted.map((item) => `
+    readingsTableBody.innerHTML = sorted.map(item => `
       <tr>
         <td>${escapeHTML(item.date)}</td>
         <td>${number(item.units, 2)} kWh</td>
@@ -401,7 +442,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   };
 
   // ---------------------------------------------------------
-  // Energy usage chart — actual saved readings
+  // Energy usage analytics — personal readings only
   // ---------------------------------------------------------
 
   const chartCanvas = $('#usageChart');
@@ -410,9 +451,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   const rangeButtons = $$('.range-btn');
 
   let usageChart = null;
-  let currentRange = 'day';
+  let currentRange = 'week';
 
-  const startOfWeek = (date) => {
+  const startOfWeek = date => {
     const result = new Date(
       date.getFullYear(),
       date.getMonth(),
@@ -425,13 +466,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     return result;
   };
 
-  const formatShortDate = (date) =>
+  const formatShortDate = date =>
     new Intl.DateTimeFormat('en', {
       day: 'numeric',
       month: 'short'
     }).format(date);
 
-  const getChartData = (range) => {
+  const getChartData = range => {
     const today = new Date();
     const todayStart = new Date(
       today.getFullYear(),
@@ -442,17 +483,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     const buckets = [];
 
     if (range === 'day') {
+      // Daily totals for the last seven calendar days.
       for (let i = 6; i >= 0; i--) {
         const date = new Date(todayStart);
         date.setDate(date.getDate() - i);
 
         buckets.push({
+          start: date,
+          end: new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1),
           key: localDate(date),
           label: formatShortDate(date),
           value: 0
         });
       }
     } else if (range === 'week') {
+      // Eight weekly buckets, starting Monday.
       const monday = startOfWeek(todayStart);
 
       for (let i = 7; i >= 0; i--) {
@@ -470,6 +515,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
       }
     } else if (range === 'month') {
+      // Six calendar months including the current month.
       for (let i = 5; i >= 0; i--) {
         const start = new Date(
           today.getFullYear(),
@@ -495,27 +541,22 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     }
 
-    readings.forEach((reading) => {
+    readings.forEach(reading => {
       const date = parseDate(reading.date);
 
-      if (range === 'day') {
-        const bucket = buckets.find(
-          (item) => item.key === reading.date
-        );
+      const bucket = buckets.find(item =>
+        date >= item.start && date < item.end
+      );
 
-        if (bucket) bucket.value += reading.units;
-      } else {
-        const bucket = buckets.find(
-          (item) => date >= item.start && date < item.end
-        );
-
-        if (bucket) bucket.value += reading.units;
+      if (bucket) {
+        bucket.value += reading.units;
       }
     });
 
     return {
-      labels: buckets.map((item) => item.label),
-      values: buckets.map((item) => Number(item.value.toFixed(2)))
+      labels: buckets.map(item => item.label),
+      values: buckets.map(item => Number(item.value.toFixed(2))),
+      hasReadings: buckets.map(item => item.value > 0)
     };
   };
 
@@ -528,17 +569,24 @@ document.addEventListener('DOMContentLoaded', async () => {
   const updateChart = () => {
     const data = getChartData(currentRange);
     const total = data.values.reduce((sum, value) => sum + value, 0);
+    const recordedBuckets = data.hasReadings.filter(Boolean).length;
 
     if (chartTotal) {
-      chartTotal.innerHTML = `${number(total, 2)} <span>kWh</span>`;
+      chartTotal.innerHTML =
+        `${number(total, 2)} <span>kWh</span>`;
     }
 
     if (chartCaption) {
-      chartCaption.textContent = rangeCaptions[currentRange];
+      const average = data.values.length ? total / data.values.length : 0;
+
+      chartCaption.textContent = readings.length
+        ? `${rangeCaptions[currentRange]} · ${number(average, 2)} kWh per period`
+        : `${rangeCaptions[currentRange]} · No personal readings yet`;
     }
 
-    rangeButtons.forEach((button) => {
+    rangeButtons.forEach(button => {
       const active = button.dataset.range === currentRange;
+
       button.classList.toggle('active', active);
       button.setAttribute('aria-pressed', String(active));
     });
@@ -546,11 +594,40 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (usageChart) {
       usageChart.data.labels = data.labels;
       usageChart.data.datasets[0].data = data.values;
+
       usageChart.update();
+    }
+
+    if (chartCanvas) {
+      chartCanvas.setAttribute(
+        'aria-label',
+        readings.length
+          ? `Personal electricity usage chart. ${number(total, 2)} kWh across the selected periods; ${recordedBuckets} periods contain readings.`
+          : 'No personal electricity readings are available for this chart.'
+      );
+    }
+
+    const chartPanel = chartCanvas?.closest('.chart-panel');
+    let emptyMessage = chartPanel?.querySelector('.analytics-empty');
+
+    if (chartPanel && !readings.length) {
+      if (!emptyMessage) {
+        emptyMessage = document.createElement('p');
+        emptyMessage.className = 'analytics-empty';
+        emptyMessage.setAttribute('role', 'status');
+        emptyMessage.style.cssText =
+          'margin:12px 0 0;color:#91a2b8;font-size:13px;text-align:center;';
+        chartCanvas.parentElement?.insertAdjacentElement('afterend', emptyMessage);
+      }
+
+      emptyMessage.textContent =
+        'Add a personal reading in My Readings to see your usage analytics.';
+    } else if (emptyMessage) {
+      emptyMessage.remove();
     }
   };
 
-  rangeButtons.forEach((button) => {
+  rangeButtons.forEach(button => {
     button.addEventListener('click', () => {
       const range = button.dataset.range;
 
@@ -582,20 +659,29 @@ document.addEventListener('DOMContentLoaded', async () => {
             backgroundColor: gradient,
             borderWidth: 2.5,
             pointRadius: 3,
-            pointHoverRadius: 5,
+            pointHoverRadius: 6,
             pointBackgroundColor: '#22d3ee',
             pointBorderColor: '#0b1220',
             pointBorderWidth: 2,
             fill: true,
-            tension: 0.38
+            tension: 0.38,
+            spanGaps: false
           }]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          interaction: { intersect: false, mode: 'index' },
+          interaction: {
+            intersect: false,
+            mode: 'index'
+          },
+          animation: {
+            duration: 350
+          },
           plugins: {
-            legend: { display: false },
+            legend: {
+              display: false
+            },
             tooltip: {
               backgroundColor: '#111c2e',
               titleColor: '#f3f7fb',
@@ -603,28 +689,45 @@ document.addEventListener('DOMContentLoaded', async () => {
               borderColor: 'rgba(148, 163, 184, 0.2)',
               borderWidth: 1,
               padding: 10,
+              displayColors: false,
               callbacks: {
-                label: (context) => ` ${number(context.parsed.y, 2)} kWh`
+                label: context =>
+                  ` Usage: ${number(context.parsed.y, 2)} kWh`
               }
             }
           },
           scales: {
             x: {
-              grid: { display: false },
-              border: { display: false },
+              grid: {
+                display: false
+              },
+              border: {
+                display: false
+              },
               ticks: {
                 color: '#91a2b8',
-                font: { family: 'DM Sans' }
+                font: {
+                  family: 'DM Sans'
+                },
+                maxRotation: 0,
+                autoSkip: true
               }
             },
             y: {
               beginAtZero: true,
-              grid: { color: 'rgba(148, 163, 184, 0.10)' },
-              border: { display: false, dash: [4, 4] },
+              grid: {
+                color: 'rgba(148, 163, 184, 0.10)'
+              },
+              border: {
+                display: false,
+                dash: [4, 4]
+              },
               ticks: {
                 color: '#91a2b8',
                 padding: 8,
-                font: { family: 'DM Sans' }
+                font: {
+                  family: 'DM Sans'
+                }
               }
             }
           }
@@ -634,9 +737,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   } else if (chartCanvas) {
     console.warn('Lumora: Chart.js was not loaded.');
   }
-
-  // ---------------------------------------------------------
-  // Dashboard summary
+     // ---------------------------------------------------------
+  // Dashboard summary — personal readings only
   // ---------------------------------------------------------
 
   const totalCost = $('#totalCost');
@@ -671,15 +773,110 @@ document.addEventListener('DOMContentLoaded', async () => {
         2
       );
     }
+
+    // Keep sample labels from implying a real measured trend.
+    const statCards = $$('.stats-grid .stat-card');
+
+    if (statCards[0]) {
+      const trend = $('.trend', statCards[0]);
+      const footer = $('.stat-footer', statCards[0]);
+
+      if (trend) {
+        trend.textContent = 'PERSONAL DATA';
+        trend.classList.remove('positive');
+      }
+
+      if (footer) {
+        footer.querySelector('.muted')?.remove();
+
+        if (!footer.querySelector('.personal-data-label')) {
+          const label = document.createElement('span');
+          label.className = 'muted personal-data-label';
+          label.textContent = readings.length
+            ? `${dailyTotals.length} recorded day(s)`
+            : 'No readings recorded yet';
+
+          footer.appendChild(label);
+        }
+      }
+    }
+
+    if (statCards[1]) {
+      const label = $('.stat-footer .muted', statCards[1]);
+      const footnote = $('.stat-footnote', statCards[1]);
+
+      if (label) {
+        label.textContent = validTariff
+          ? 'Estimate from personal readings'
+          : 'Enter a valid rate to estimate cost';
+      }
+
+      if (footnote) {
+        footnote.textContent = validTariff
+          ? `Using ৳${number(tariff, 2)} per kWh`
+          : 'Cost estimate unavailable';
+      }
+    }
+
+    if (statCards[2]) {
+      const label = $('.stat-footer .muted', statCards[2]);
+      const track = $('.progress-track', statCards[2]);
+      const footnote = $('.stat-footnote', statCards[2]);
+
+      if (label) {
+        label.textContent = dailyTotals.length
+          ? 'Average per recorded day'
+          : 'No personal readings yet';
+      }
+
+      if (track) {
+        const fill = $('span', track);
+
+        track.setAttribute(
+          'aria-label',
+          dailyTotals.length
+            ? `Daily average ${number(total / dailyTotals.length, 2)} kWh; reference level 10 kWh`
+            : 'No daily average available'
+        );
+
+        if (fill) {
+          const percentage = dailyTotals.length
+            ? Math.min(100, (total / dailyTotals.length / 10) * 100)
+            : 0;
+
+          fill.style.width = `${percentage}%`;
+        }
+      }
+
+      if (footnote) {
+        footnote.textContent = 'Reference level: 10 kWh/day';
+      }
+    }
   };
 
   if (tariffInput) {
-    tariffInput.addEventListener('input', updateDashboardSummary);
+    tariffInput.addEventListener('input', () => {
+      updateDashboardSummary();
+
+      // Update the bill estimate immediately as the rate changes.
+      if (
+        unitsInput &&
+        unitsInput.value.trim() !== '' &&
+        tariffInput.value.trim() !== '' &&
+        Number(unitsInput.value) >= 0 &&
+        Number(tariffInput.value) >= 0
+      ) {
+        if (estimatedBill) {
+          estimatedBill.textContent = money(
+            Number(unitsInput.value) * Number(tariffInput.value)
+          );
+        }
+      }
+    });
   }
 
   // ---------------------------------------------------------
-  // Smart Energy Insights
-  // Uses personal readings and avoids misleading comparisons.
+  // Smart Energy Insights — cautious, data-based comparisons
   // ---------------------------------------------------------
 
   const insightsPanel = $('#insights');
@@ -698,7 +895,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const latest = dailyTotals[dailyTotals.length - 1];
     const previous = dailyTotals[dailyTotals.length - 2];
 
-    // Card 1: compare recorded days carefully.
     let comparison = {
       title: 'Compare your readings',
       text: 'Add readings from different dates to begin comparing your usage.',
@@ -761,7 +957,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     }
 
-    // Card 2: factual summary of stored entries.
     let summary;
 
     if (uniqueDays === 0) {
@@ -780,7 +975,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       };
     }
 
-    // Card 3: recommendations without unsupported claims.
     let recommendation;
 
     if (uniqueDays < 2) {
@@ -806,9 +1000,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       };
     }
 
-    const cards = [comparison, summary, recommendation];
-
-    cards.forEach((card, index) => {
+    [comparison, summary, recommendation].forEach((card, index) => {
       const item = insightItems[index];
       const icon = $('.insight-icon', item);
       const title = $('h3', item);
@@ -822,22 +1014,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     if (insightsBadge) {
-      insightsBadge.textContent = uniqueDays ? 'PERSONAL DATA' : 'NO DATA';
+      insightsBadge.textContent = uniqueDays
+        ? 'PERSONAL DATA'
+        : 'NO DATA';
     }
 
     if (insightsFooter) {
       insightsFooter.textContent = uniqueDays
-        ? `Rule-based insights · ${uniqueDays} recorded ${uniqueDays === 1 ? 'day' : 'days'} · Stored in this browser`
+        ? `Rule-based insights · ${uniqueDays} recorded ${uniqueDays === 1 ? 'day' : 'days'} · Synced to your account`
         : 'Add personal readings to generate insights';
     }
   };
-
-  // ---------------------------------------------------------
-  // Add and edit readings
+     // ---------------------------------------------------------
+  // Add and edit readings — Supabase cloud storage
   // ---------------------------------------------------------
 
   if (readingForm && readingDate && readingUnits) {
-    readingForm.addEventListener('submit', async (event) => {
+    readingForm.addEventListener('submit', async event => {
       event.preventDefault();
 
       const date = readingDate.value;
@@ -855,14 +1048,26 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
       }
 
+      // Reject impossible calendar dates.
+      const parsed = parseDate(date);
+
+      if (localDate(parsed) !== date) {
+        showToast('Please choose a valid calendar date.');
+        return;
+      }
+
       const submitButton = $('button[type="submit"]', readingForm);
+
       if (submitButton) submitButton.disabled = true;
 
       try {
         if (editingId) {
           const { data, error } = await supabaseClient
             .from('lumora_readings')
-            .update({ reading_date: date, units })
+            .update({
+              reading_date: date,
+              units
+            })
             .eq('id', editingId)
             .eq('user_id', currentUser.id)
             .select('id, reading_date, units')
@@ -870,9 +1075,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 
           if (error) throw error;
 
-          readings = readings.map(item => item.id === editingId
-            ? { id: String(data.id), date: data.reading_date, units: Number(data.units) }
-            : item);
+          readings = readings.map(item =>
+            item.id === editingId
+              ? {
+                  id: String(data.id),
+                  date: data.reading_date,
+                  units: Number(data.units)
+                }
+              : item
+          );
+
           showToast('Reading updated in your account.');
         } else {
           const { data, error } = await supabaseClient
@@ -892,6 +1104,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             date: data.reading_date,
             units: Number(data.units)
           });
+
           showToast('Reading saved to your account.');
         }
 
@@ -908,16 +1121,17 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   // ---------------------------------------------------------
-  // Edit and delete
+  // Edit and delete saved readings
   // ---------------------------------------------------------
 
   if (readingsTableBody) {
-    readingsTableBody.addEventListener('click', async (event) => {
+    readingsTableBody.addEventListener('click', async event => {
       const button = event.target.closest('button[data-action]');
+
       if (!button) return;
 
       const item = readings.find(
-        (reading) => reading.id === button.dataset.id
+        reading => reading.id === button.dataset.id
       );
 
       if (!item) return;
@@ -950,6 +1164,8 @@ document.addEventListener('DOMContentLoaded', async () => {
           return;
         }
 
+        button.disabled = true;
+
         try {
           const { error } = await supabaseClient
             .from('lumora_readings')
@@ -959,7 +1175,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
           if (error) throw error;
 
-          readings = readings.filter(reading => reading.id !== item.id);
+          readings = readings.filter(
+            reading => reading.id !== item.id
+          );
+
           saveReadings();
           refreshAll();
 
@@ -971,6 +1190,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         } catch (error) {
           console.error('Lumora reading delete failed:', error);
           showToast('Could not delete from cloud. Please try again.');
+        } finally {
+          button.disabled = false;
         }
       }
     });
@@ -989,12 +1210,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       const rows = [
         ['Date', 'Usage (kWh)'],
-        ...sortedReadings().map((item) => [item.date, item.units])
+        ...sortedReadings().map(item => [
+          item.date,
+          item.units
+        ])
       ];
 
       const csv = rows
-        .map((row) =>
-          row.map((cell) =>
+        .map(row =>
+          row.map(cell =>
             `"${String(cell).replace(/"/g, '""')}"`
           ).join(',')
         )
@@ -1031,11 +1255,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderInsights();
   }
 
+  // Initial render
   refreshAll();
 
   if (window.location.hash) {
     setActiveNav(window.location.hash);
   }
 
-  console.info('Lumora loaded. Personal insights use saved readings.');
+  console.info(
+    'Lumora loaded. Personal analytics use saved account readings.'
+  );
 });
