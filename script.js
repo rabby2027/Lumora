@@ -1,7 +1,7 @@
 
 /* =========================================================
    LUMORA — Energy Analytics Dashboard
-   Personal readings + real rule-based energy insights
+   Personal readings + cautious energy insights
    ========================================================= */
 
 'use strict';
@@ -47,6 +47,12 @@ document.addEventListener('DOMContentLoaded', () => {
       year: 'numeric'
     }).format(parseDate(value));
 
+  const daysBetween = (first, second) =>
+    Math.round(
+      (parseDate(second).getTime() - parseDate(first).getTime()) /
+      86400000
+    );
+
   // ---------------------------------------------------------
   // Date chip
   // ---------------------------------------------------------
@@ -63,7 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ---------------------------------------------------------
-  // Toast notifications
+  // Toast notification
   // ---------------------------------------------------------
 
   let toastTimeout;
@@ -170,7 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ---------------------------------------------------------
-  // Personal readings: localStorage
+  // My Readings — browser local storage
   // ---------------------------------------------------------
 
   const STORAGE_KEY = 'lumora-personal-readings-v1';
@@ -226,7 +232,7 @@ document.addEventListener('DOMContentLoaded', () => {
       b.date.localeCompare(a.date) || b.id.localeCompare(a.id)
     );
 
-  // Group multiple entries on the same date into one daily total.
+  // Multiple entries from the same date are combined for comparisons.
   const getDailyTotals = () => {
     const totals = new Map();
 
@@ -298,7 +304,7 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   // ---------------------------------------------------------
-  // Energy usage chart
+  // Energy usage chart — actual saved readings
   // ---------------------------------------------------------
 
   const chartCanvas = $('#usageChart');
@@ -310,15 +316,17 @@ document.addEventListener('DOMContentLoaded', () => {
   let currentRange = 'day';
 
   const startOfWeek = (date) => {
-    const result = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-    const day = result.getDay();
+    const result = new Date(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate()
+    );
 
+    const day = result.getDay();
     result.setDate(result.getDate() - (day === 0 ? 6 : day - 1));
 
     return result;
   };
-
-  const dateKey = (date) => localDate(date);
 
   const formatShortDate = (date) =>
     new Intl.DateTimeFormat('en', {
@@ -342,16 +350,16 @@ document.addEventListener('DOMContentLoaded', () => {
         date.setDate(date.getDate() - i);
 
         buckets.push({
-          key: dateKey(date),
+          key: localDate(date),
           label: formatShortDate(date),
           value: 0
         });
       }
     } else if (range === 'week') {
-      const currentMonday = startOfWeek(todayStart);
+      const monday = startOfWeek(todayStart);
 
       for (let i = 7; i >= 0; i--) {
-        const start = new Date(currentMonday);
+        const start = new Date(monday);
         start.setDate(start.getDate() - i * 7);
 
         const end = new Date(start);
@@ -434,7 +442,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     rangeButtons.forEach((button) => {
       const active = button.dataset.range === currentRange;
-
       button.classList.toggle('active', active);
       button.setAttribute('aria-pressed', String(active));
     });
@@ -489,10 +496,7 @@ document.addEventListener('DOMContentLoaded', () => {
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          interaction: {
-            intersect: false,
-            mode: 'index'
-          },
+          interaction: { intersect: false, mode: 'index' },
           plugins: {
             legend: { display: false },
             tooltip: {
@@ -503,8 +507,7 @@ document.addEventListener('DOMContentLoaded', () => {
               borderWidth: 1,
               padding: 10,
               callbacks: {
-                label: (context) =>
-                  ` ${number(context.parsed.y, 2)} kWh`
+                label: (context) => ` ${number(context.parsed.y, 2)} kWh`
               }
             }
           },
@@ -519,13 +522,8 @@ document.addEventListener('DOMContentLoaded', () => {
             },
             y: {
               beginAtZero: true,
-              grid: {
-                color: 'rgba(148, 163, 184, 0.10)'
-              },
-              border: {
-                display: false,
-                dash: [4, 4]
-              },
+              grid: { color: 'rgba(148, 163, 184, 0.10)' },
+              border: { display: false, dash: [4, 4] },
               ticks: {
                 color: '#91a2b8',
                 padding: 8,
@@ -541,7 +539,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ---------------------------------------------------------
-  // Dashboard summary based on personal readings
+  // Dashboard summary
   // ---------------------------------------------------------
 
   const totalCost = $('#totalCost');
@@ -583,7 +581,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ---------------------------------------------------------
-  // Smart Energy Insights — rule-based, saved data only
+  // Smart Energy Insights
+  // Uses personal readings and avoids misleading comparisons.
   // ---------------------------------------------------------
 
   const insightsPanel = $('#insights');
@@ -599,125 +598,118 @@ document.addEventListener('DOMContentLoaded', () => {
     const uniqueDays = dailyTotals.length;
     const average = uniqueDays ? total / uniqueDays : 0;
 
-    const newest = dailyTotals[dailyTotals.length - 1];
+    const latest = dailyTotals[dailyTotals.length - 1];
     const previous = dailyTotals[dailyTotals.length - 2];
 
-    // Card 1: Compare the latest two recorded dates.
-    let comparisonTitle = 'Compare your readings';
-    let comparisonText =
-      'Add readings from at least two different dates to compare daily electricity use.';
-    let comparisonType = 'WAITING FOR DATA';
-    let comparisonIcon = '↔';
+    // Card 1: compare recorded days carefully.
+    let comparison = {
+      title: 'Compare your readings',
+      text: 'Add readings from different dates to begin comparing your usage.',
+      type: 'WAITING FOR DATA',
+      icon: '↔'
+    };
 
-    if (newest && previous) {
-      const difference = newest.units - previous.units;
-      const percent = previous.units > 0
-        ? Math.abs(difference / previous.units) * 100
-        : null;
+    if (!latest) {
+      comparison = {
+        title: 'Start tracking your energy',
+        text: 'No personal readings are saved yet. Add a date and kWh value in My Readings to begin.',
+        type: 'NO PERSONAL DATA',
+        icon: '+'
+      };
+    } else if (!previous) {
+      comparison = {
+        title: 'First recorded day',
+        text: `Your saved data shows ${number(latest.units, 2)} kWh on ${formatDate(latest.date)}. Add a reading from another date to compare usage.`,
+        type: 'EARLY DATA',
+        icon: '•'
+      };
+    } else {
+      const gap = daysBetween(previous.date, latest.date);
+      const difference = latest.units - previous.units;
 
-      if (difference > 0) {
-        comparisonTitle = 'Usage increased';
-        comparisonText = percent === null
-          ? `Your latest recorded day used ${number(difference, 2)} kWh more than the previous recorded day.`
-          : `Usage rose by ${number(percent, 1)}% from ${number(previous.units, 2)} kWh on ${formatDate(previous.date)} to ${number(newest.units, 2)} kWh on ${formatDate(newest.date)}.`;
-        comparisonType = 'RECORDED-DAY COMPARISON';
-        comparisonIcon = '↗';
-      } else if (difference < 0) {
-        comparisonTitle = 'Usage decreased';
-        comparisonText = percent === null
-          ? `Your latest recorded day used ${number(Math.abs(difference), 2)} kWh less than the previous recorded day.`
-          : `Usage fell by ${number(percent, 1)}% from ${number(previous.units, 2)} kWh on ${formatDate(previous.date)} to ${number(newest.units, 2)} kWh on ${formatDate(newest.date)}.`;
-        comparisonType = 'RECORDED-DAY COMPARISON';
-        comparisonIcon = '↘';
+      if (gap === 1) {
+        const percent = previous.units > 0
+          ? Math.abs(difference / previous.units) * 100
+          : null;
+
+        if (difference > 0) {
+          comparison = {
+            title: 'Recorded usage increased',
+            text: `Usage changed from ${number(previous.units, 2)} kWh on ${formatDate(previous.date)} to ${number(latest.units, 2)} kWh on ${formatDate(latest.date)}${percent === null ? '.' : `, an increase of ${number(percent, 1)}%`}. This comparison alone does not establish the cause.`,
+            type: 'CONSECUTIVE-DAY COMPARISON',
+            icon: '↗'
+          };
+        } else if (difference < 0) {
+          comparison = {
+            title: 'Recorded usage decreased',
+            text: `Usage changed from ${number(previous.units, 2)} kWh on ${formatDate(previous.date)} to ${number(latest.units, 2)} kWh on ${formatDate(latest.date)}${percent === null ? '.' : `, a decrease of ${number(percent, 1)}%`}. Lower usage does not by itself prove energy savings.`,
+            type: 'CONSECUTIVE-DAY COMPARISON',
+            icon: '↘'
+          };
+        } else {
+          comparison = {
+            title: 'Recorded usage was unchanged',
+            text: `Both ${formatDate(previous.date)} and ${formatDate(latest.date)} show ${number(latest.units, 2)} kWh. Continue recording comparable days to build a useful trend.`,
+            type: 'CONSECUTIVE-DAY COMPARISON',
+            icon: '→'
+          };
+        }
       } else {
-        comparisonTitle = 'Usage stayed the same';
-        comparisonText =
-          `Both recorded days show ${number(newest.units, 2)} kWh of usage. Keep recording readings to follow your trend.`;
-        comparisonType = 'RECORDED-DAY COMPARISON';
-        comparisonIcon = '→';
+        comparison = {
+          title: 'Readings are not consecutive',
+          text: `The latest recorded day was ${formatDate(latest.date)} (${number(latest.units, 2)} kWh). The previous recorded day was ${formatDate(previous.date)} (${number(previous.units, 2)} kWh), ${gap} days earlier. A direct percentage comparison may be misleading.`,
+          type: `${gap}-DAY DATE GAP`,
+          icon: '↔'
+        };
       }
-    } else if (newest) {
-      comparisonTitle = 'First recorded day';
-      comparisonText =
-        `Your saved data shows ${number(newest.units, 2)} kWh on ${formatDate(newest.date)}. Add another date to compare usage.`;
-      comparisonType = 'EARLY DATA';
-      comparisonIcon = '•';
-    } else {
-      comparisonTitle = 'Start tracking your energy';
-      comparisonText =
-        'No personal readings are saved yet. Add a date and kWh value in My Readings to begin.';
-      comparisonType = 'NO PERSONAL DATA';
-      comparisonIcon = '+';
     }
 
-    // Card 2: Summarize the user's saved readings.
-    let summaryTitle = 'Your usage summary';
-    let summaryText =
-      'Your saved readings will be summarized here.';
-    let summaryType = 'PERSONAL SUMMARY';
-    let summaryIcon = '◷';
+    // Card 2: factual summary of stored entries.
+    let summary;
 
-    if (uniqueDays > 0) {
-      summaryTitle = 'Your recorded usage';
-      summaryText =
-        `${number(total, 2)} kWh across ${uniqueDays} recorded ${uniqueDays === 1 ? 'day' : 'days'}. Average: ${number(average, 2)} kWh per recorded day.`;
-      summaryType = 'SAVED PERSONAL DATA';
-      summaryIcon = '▤';
+    if (uniqueDays === 0) {
+      summary = {
+        title: 'No usage summary yet',
+        text: 'Save personal readings to calculate total usage and average per recorded day.',
+        type: 'WAITING FOR DATA',
+        icon: '▤'
+      };
     } else {
-      summaryTitle = 'No usage summary yet';
-      summaryText =
-        'Once you save readings, Lumora will calculate your total and average usage.';
-      summaryType = 'WAITING FOR DATA';
-      summaryIcon = '◷';
+      summary = {
+        title: 'Your recorded usage',
+        text: `${number(total, 2)} kWh across ${uniqueDays} recorded ${uniqueDays === 1 ? 'day' : 'days'}. Average: ${number(average, 2)} kWh per recorded day.`,
+        type: 'SAVED PERSONAL DATA',
+        icon: '▤'
+      };
     }
 
-    // Card 3: A cautious, rule-based recommendation.
-    let adviceTitle = 'Keep recording consistently';
-    let adviceText =
-      'Record usage on comparable days. More consistent data helps you spot meaningful changes.';
-    let adviceType = 'PRACTICAL TIP';
-    let adviceIcon = '✓';
+    // Card 3: recommendations without unsupported claims.
+    let recommendation;
 
     if (uniqueDays < 2) {
-      adviceTitle = 'Build a useful history';
-      adviceText =
-        'Record readings on at least two different dates before drawing conclusions about increases or savings.';
-      adviceType = 'DATA QUALITY';
-      adviceIcon = '＋';
+      recommendation = {
+        title: 'Build a useful history',
+        text: 'Record usage on at least two different dates. Keep recording comparable days before drawing conclusions about changes or savings.',
+        type: 'DATA QUALITY',
+        icon: '+'
+      };
     } else if (average > 10) {
-      adviceTitle = 'Review your daily usage';
-      adviceText =
-        `Your average is ${number(average, 2)} kWh per recorded day. Review high-consumption appliances and compare similar days before making changes.`;
-      adviceType = 'USAGE REVIEW';
-      adviceIcon = '!';
+      recommendation = {
+        title: 'Review your recorded usage',
+        text: `Your average is ${number(average, 2)} kWh per recorded day. If this reflects a full day of household usage, review appliance use and compare similar days before deciding whether changes helped.`,
+        type: 'USAGE REVIEW',
+        icon: '!'
+      };
     } else {
-      adviceTitle = 'Keep tracking your usage';
-      adviceText =
-        `Your average is ${number(average, 2)} kWh per recorded day. Continue recording comparable days to understand your normal usage pattern.`;
-      adviceType = 'PERSONALIZED TIP';
-      adviceIcon = '✓';
+      recommendation = {
+        title: 'Keep tracking consistently',
+        text: `Your average is ${number(average, 2)} kWh per recorded day. Continue logging comparable days; the current data is not enough to identify which appliances use the most electricity.`,
+        type: 'PERSONALIZED TIP',
+        icon: '✓'
+      };
     }
 
-    const cards = [
-      {
-        title: comparisonTitle,
-        text: comparisonText,
-        type: comparisonType,
-        icon: comparisonIcon
-      },
-      {
-        title: summaryTitle,
-        text: summaryText,
-        type: summaryType,
-        icon: summaryIcon
-      },
-      {
-        title: adviceTitle,
-        text: adviceText,
-        type: adviceType,
-        icon: adviceIcon
-      }
-    ];
+    const cards = [comparison, summary, recommendation];
 
     cards.forEach((card, index) => {
       const item = insightItems[index];
@@ -789,7 +781,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ---------------------------------------------------------
-  // Edit and delete controls
+  // Edit and delete
   // ---------------------------------------------------------
 
   if (readingsTableBody) {
