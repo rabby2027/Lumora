@@ -1,298 +1,458 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#08111f">
-  <title>Login | Lumora</title>
-  <meta name="description" content="Sign in or create your Lumora energy analytics account.">
+  <meta name="theme-color" content="#0b1220">
+  <meta name="description" content="Create your Lumora account and securely save your energy readings.">
+  <title>Account — Lumora</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
     :root {
       color-scheme: dark;
       --bg: #08111f;
       --panel: #101d30;
-      --border: #26384f;
-      --text: #f1f7ff;
-      --muted: #9aabc0;
-      --cyan: #36d9f5;
-      --cyan-dark: #0ea5c6;
-      --danger: #ff8b8b;
-      --success: #7ce7b1;
+      --line: #26384f;
+      --muted: #9eb4d0;
+      --cyan: #39d9e8;
+      --mint: #61e2ce;
+      --white: #f5f8ff;
     }
 
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+    }
 
     body {
       margin: 0;
       min-height: 100vh;
-      padding: 24px;
-      display: grid;
-      place-items: center;
+      padding: 30px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       background:
-        radial-gradient(ellipse at 15% 10%, #12314b 0, transparent 42%),
-        radial-gradient(ellipse at 90% 90%, #102c3c 0, transparent 38%),
+        radial-gradient(ellipse at 12% 12%, #12304a 0, transparent 43%),
+        radial-gradient(ellipse at 95% 90%, #0c3440 0, transparent 40%),
         var(--bg);
-      color: var(--text);
-      font-family: Inter, "Segoe UI", Arial, sans-serif;
+      font-family: "DM Sans", sans-serif;
+      color: var(--white);
     }
 
-    .auth-shell {
+    .wrap {
       width: 100%;
-      max-width: 440px;
+      max-width: 550px;
     }
 
     .brand {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 12px;
-      margin-bottom: 26px;
-    }
-
-    .brand-mark {
-      width: 45px;
-      height: 45px;
-      display: grid;
-      place-items: center;
-      border-radius: 14px;
-      background: linear-gradient(135deg, var(--cyan), #8b8bff);
-      color: #06111e;
-      font-size: 25px;
-      font-weight: 900;
-    }
-
-    .brand-name {
-      font-size: 28px;
-      font-weight: 800;
+      gap: 14px;
+      margin-bottom: 8px;
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 32px;
+      font-weight: 700;
       letter-spacing: -1px;
     }
 
-    .brand-name span { color: var(--cyan); }
+    .mark {
+      display: grid;
+      place-items: center;
+      width: 56px;
+      height: 56px;
+      border-radius: 17px;
+      background: linear-gradient(135deg, #35d7e8, #8185ff);
+      color: #061525;
+      font-size: 30px;
+    }
+
+    .brand-name {
+      background: linear-gradient(90deg, #fff 55%, #43d8e7);
+      color: transparent;
+      background-clip: text;
+    }
 
     .tagline {
-      margin: 5px 0 0;
       text-align: center;
       color: var(--muted);
-      font-size: 13px;
+      margin: 0 0 22px;
     }
 
     .card {
-      padding: 30px;
-      border: 1px solid var(--border);
-      border-radius: 22px;
-      background: rgba(16, 29, 48, .94);
-      box-shadow: 0 24px 80px #0005;
+      background: rgba(16, 29, 48, 0.96);
+      border: 1px solid var(--line);
+      border-radius: 27px;
+      padding: 30px 34px 32px;
+      box-shadow: 0 22px 70px #0002;
     }
 
     .tabs {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 6px;
-      padding: 5px;
-      border-radius: 12px;
-      background: #091525;
-      margin-bottom: 25px;
+      padding: 6px;
+      background: #071322;
+      border-radius: 15px;
+      margin-bottom: 28px;
     }
 
-    .tab {
-      padding: 11px;
-      border: 0;
-      border-radius: 9px;
-      background: transparent;
+    .tabs a {
+      padding: 12px 10px;
+      text-align: center;
+      border-radius: 11px;
+      text-decoration: none;
       color: var(--muted);
-      font-size: 14px;
       font-weight: 700;
-      cursor: pointer;
     }
 
-    .tab.active {
-      color: var(--text);
-      background: #20364d;
+    .tabs a.active {
+      background: #20384f;
+      color: white;
     }
 
     h1 {
-      margin: 0 0 9px;
-      font-size: 27px;
-      letter-spacing: -.7px;
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 30px;
+      line-height: 1.2;
+      letter-spacing: -0.8px;
+      margin: 0 0 10px;
     }
 
-    .subtitle {
-      margin: 0 0 25px;
+    .intro {
       color: var(--muted);
-      font-size: 14px;
-      line-height: 1.6;
+      line-height: 1.65;
+      margin: 0 0 24px;
     }
-
-    .field { margin-bottom: 18px; }
 
     label {
       display: block;
-      margin-bottom: 8px;
-      font-size: 13px;
-      font-weight: 650;
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 9px;
     }
 
     input {
-      display: block;
       width: 100%;
-      padding: 13px 14px;
-      border: 1px solid var(--border);
-      border-radius: 11px;
-      outline: none;
-      background: #091525;
-      color: var(--text);
+      padding: 15px 16px;
+      border-radius: 13px;
+      border: 1px solid var(--line);
+      background: #071322;
+      color: white;
       font: inherit;
-      font-size: 14px;
+      outline: none;
     }
 
     input:focus {
       border-color: var(--cyan);
-      box-shadow: 0 0 0 3px #36d9f51c;
+      box-shadow: 0 0 0 3px #39d9e81c;
     }
 
-    .password-hint {
-      margin: 7px 0 0;
+    .field {
+      margin-bottom: 19px;
+    }
+
+    .names {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .hint {
       color: var(--muted);
-      font-size: 12px;
-    }
-
-    .submit {
-      width: 100%;
-      padding: 14px;
-      margin-top: 5px;
-      border: 0;
-      border-radius: 11px;
-      background: linear-gradient(100deg, var(--cyan), #66e4cf);
-      color: #06111e;
-      font-size: 15px;
-      font-weight: 800;
-      cursor: pointer;
-      transition: opacity .2s, transform .2s;
-    }
-
-    .submit:hover { transform: translateY(-1px); }
-
-    .submit:disabled {
-      opacity: .55;
-      cursor: wait;
-      transform: none;
-    }
-
-    .message {
-      display: none;
-      padding: 12px 13px;
-      margin-bottom: 18px;
-      border: 1px solid var(--border);
-      border-radius: 10px;
       font-size: 13px;
-      line-height: 1.55;
+      margin-top: 8px;
+      line-height: 1.6;
+    }
+
+    button,
+    .primary {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      border: 0;
+      border-radius: 13px;
+      padding: 16px;
+      background: linear-gradient(100deg, var(--cyan), var(--mint));
+      color: #061525;
+      font: inherit;
+      font-weight: 800;
+      font-size: 16px;
+      text-decoration: none;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+
+    button:disabled {
+      opacity: 0.65;
+      cursor: wait;
+    }
+
+    .secondary {
+      background: #20384f;
+      color: #f5f8ff;
+    }
+
+    .notice {
+      display: none;
+      padding: 13px 14px;
+      border: 1px solid #285d62;
+      background: #0c2a32;
+      color: #b9f7e9;
+      border-radius: 12px;
+      line-height: 1.5;
+      font-size: 14px;
+      margin: 0 0 18px;
       overflow-wrap: anywhere;
     }
 
-    .message.show { display: block; }
-    .message.error { color: var(--danger); background: #451c272b; }
-    .message.success { color: var(--success); background: #123d302b; }
-    .message.info { color: var(--cyan); background: #12374a45; }
-
-    .forgot {
-      display: block;
-      margin: -5px 0 17px;
-      text-align: right;
-      color: var(--cyan);
-      font-size: 12px;
-      text-decoration: none;
+    .notice.error {
+      border-color: #75404b;
+      background: #351c29;
+      color: #ffc8d0;
     }
 
-    .forgot:hover { text-decoration: underline; }
-
-    .footer {
-      margin: 22px 0 0;
+    .privacy {
       text-align: center;
-      color: var(--muted);
-      font-size: 12px;
-      line-height: 1.7;
-    }
-
-    .footer a { color: var(--cyan); text-decoration: none; }
-
-    .back-link {
-      display: block;
-      margin-top: 22px;
       color: var(--muted);
       font-size: 13px;
+      line-height: 1.7;
+      margin: 27px 0 0;
+    }
+
+    .back {
       text-align: center;
+      margin: 25px 0 0;
+    }
+
+    .back a {
+      color: #9fbbe0;
       text-decoration: none;
     }
 
-    .back-link:hover { color: var(--cyan); }
+    .back a:hover {
+      color: var(--cyan);
+    }
 
-    @media (max-width: 480px) {
-      body { padding: 16px; }
-      .card { padding: 23px 19px; }
-      h1 { font-size: 24px; }
+    .success {
+      text-align: center;
+    }
+
+    .success-icon {
+      width: 72px;
+      height: 72px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      margin: 4px auto 22px;
+      background: #123b45;
+      color: #55e4d1;
+      font-size: 36px;
+      border: 1px solid #28606b;
+    }
+
+    .email-highlight {
+      padding: 13px 15px;
+      border: 1px solid var(--line);
+      background: #091625;
+      border-radius: 12px;
+      overflow-wrap: anywhere;
+      color: #fff;
+      font-weight: 700;
+      margin: 16px 0;
+    }
+
+    .steps {
+      color: var(--muted);
+      text-align: left;
+      line-height: 1.8;
+      padding-left: 22px;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    @media (max-width: 520px) {
+      body {
+        padding: 24px 13px;
+      }
+
+      .card {
+        padding: 24px 20px;
+        border-radius: 22px;
+      }
+
+      .brand {
+        font-size: 29px;
+      }
+
+      .names {
+        grid-template-columns: 1fr;
+        gap: 0;
+      }
+
+      h1 {
+        font-size: 27px;
+      }
     }
   </style>
 </head>
 
 <body>
-  <main class="auth-shell">
-    <header>
-      <div class="brand">
-        <div class="brand-mark" aria-hidden="true">L</div>
-        <div class="brand-name">Lum<span>o</span>ra</div>
+  <main class="wrap">
+
+    <div class="brand">
+      <div class="mark" aria-hidden="true">L</div>
+      <span class="brand-name">Lumora</span>
+    </div>
+
+    <p class="tagline">Smarter Energy, Brighter Future.</p>
+
+    <section class="card">
+
+      <nav class="tabs" id="tabs" aria-label="Account navigation">
+        <a href="./auth.html?mode=login" id="loginTab">Login</a>
+        <a href="./auth.html?mode=signup" id="signupTab" class="active">Create account</a>
+      </nav>
+
+      <div id="formView">
+        <h1 id="formTitle">Create your account</h1>
+
+        <p class="intro" id="formIntro">
+          Create a Lumora account to securely save your energy readings.
+        </p>
+
+        <div class="notice" id="notice" role="status" aria-live="polite"></div>
+
+        <form id="authForm">
+
+          <div class="names" id="nameFields">
+            <div class="field">
+              <label for="firstName">First name</label>
+              <input
+                id="firstName"
+                name="firstName"
+                autocomplete="given-name"
+                maxlength="60"
+                placeholder="First name"
+                required
+              >
+            </div>
+
+            <div class="field">
+              <label for="lastName">Last name</label>
+              <input
+                id="lastName"
+                name="lastName"
+                autocomplete="family-name"
+                maxlength="60"
+                placeholder="Last name"
+                required
+              >
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="email">Email address</label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              autocomplete="email"
+              maxlength="254"
+              placeholder="you@example.com"
+              required
+            >
+          </div>
+
+          <div class="field">
+            <label for="password">Password</label>
+            <input
+              id="password"
+              name="password"
+              type="password"
+              autocomplete="new-password"
+              minlength="8"
+              placeholder="Create a password"
+              required
+            >
+            <div class="hint" id="passwordHint">
+              Use at least 8 characters.
+            </div>
+          </div>
+
+          <div
+            id="forgotWrap"
+            style="text-align:right;margin:-5px 0 18px;font-size:13px"
+            hidden
+          >
+            <a
+              href="#"
+              id="forgotLink"
+              style="color:#39d9e8;text-decoration:none"
+            >Forgot password?</a>
+          </div>
+
+          <button id="submitButton" type="submit">
+            Create account
+          </button>
+
+        </form>
       </div>
-      <p class="tagline">Smarter Energy, Brighter Future.</p>
-    </header>
 
-    <section class="card" aria-label="Lumora account">
-      <div class="tabs" role="tablist" aria-label="Account action">
-        <button class="tab active" id="loginTab" type="button" role="tab"
-          aria-selected="true">Login</button>
-        <button class="tab" id="signupTab" type="button" role="tab"
-          aria-selected="false">Create account</button>
-      </div>
+      <div id="successView" class="success" hidden>
 
-      <h1 id="formTitle">Welcome back</h1>
-      <p class="subtitle" id="formSubtitle">
-        Sign in to access your personal energy readings and insights.
-      </p>
+        <div class="success-icon" aria-hidden="true">✉</div>
 
-      <div id="message" class="message" role="status" aria-live="polite"></div>
+        <h1>Check your email to verify</h1>
 
-      <form id="authForm">
-        <div class="field">
-          <label for="email">Email address</label>
-          <input id="email" name="email" type="email"
-            placeholder="you@example.com" autocomplete="email"
-            required maxlength="254">
-        </div>
+        <p class="intro">
+          We’ve sent a verification link to the email address below.
+          Open that message and click the verification link to activate
+          your Lumora account.
+        </p>
 
-        <div class="field">
-          <label for="password">Password</label>
-          <input id="password" name="password" type="password"
-            placeholder="Enter your password" autocomplete="current-password"
-            required minlength="8" maxlength="128">
-          <p class="password-hint" id="passwordHint">
-            Enter your account password.
-          </p>
-        </div>
+        <div class="email-highlight" id="sentEmail"></div>
 
-        <a class="forgot" href="#" id="forgotLink">Forgot password?</a>
+        <ol class="steps">
+          <li>Open your inbox and find the verification email.</li>
+          <li>Click the verification link in the email.</li>
+          <li>If it isn’t there, check your Spam or Junk folder.</li>
+        </ol>
 
-        <button class="submit" id="submitButton" type="submit">
-          Login to Lumora
+        <p class="intro" style="margin-top:18px">
+          After verification, return to Lumora and log in with your email
+          and password.
+        </p>
+
+        <a class="primary" href="./auth.html?mode=login">
+          Back to login
+        </a>
+
+        <button type="button" id="resendButton" class="secondary">
+          Resend verification email
         </button>
-      </form>
 
-      <p class="footer">
-        Your energy readings are private to your account.<br>
-        Protected by Supabase authentication and database policies.
-      </p>
+        <div class="hint" id="resendHint" role="status" aria-live="polite"></div>
+
+      </div>
     </section>
 
-    <a class="back-link" href="./index.html">← Back to Lumora dashboard</a>
+    <p class="privacy" id="privacy">
+      Your energy readings are private to your account.<br>
+      Protected by Supabase authentication and database policies.
+    </p>
+
+    <p class="back">
+      <a href="./index.html">← Back to Lumora dashboard</a>
+    </p>
+
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
