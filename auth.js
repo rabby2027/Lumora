@@ -1,4 +1,4 @@
-```javascript
+
 /* LUMORA — Authentication, Registration & Email Verification */
 'use strict';
 
@@ -391,4 +391,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
   console.info('Lumora authentication initialized.');
 });
-```
+
