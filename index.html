@@ -4,19 +4,20 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#0b1220">
-
   <meta name="description" content="Lumora is an electricity analytics dashboard for understanding energy consumption and estimated costs.">
 
   <title>Lumora — Energy Analytics</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Lumora favicon -->
+  <link rel="icon" type="image/png" href="./lumora-icon.png">
 
   <link rel="stylesheet" href="style.css">
 
-  <!-- Load Chart.js before script.js -->
+  <!-- Load dependencies before the dashboard script -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="./supabase-config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -29,8 +30,15 @@
     <!-- SIDEBAR -->
     <aside class="sidebar" id="sidebar">
 
+      <!-- Updated Lumora brand -->
       <a href="#overview" class="brand" aria-label="Lumora home">
-        <span class="brand-mark" aria-hidden="true">ϟ</span>
+        <img
+          src="./lumora-icon.png"
+          alt=""
+          class="brand-mark"
+          width="36"
+          height="36"
+        >
         <span class="brand-name">lumora<span class="brand-dot">.</span></span>
       </a>
 
@@ -118,12 +126,9 @@
 
       <!-- PAGE HEADING -->
       <section class="page-heading">
-
         <div class="page-heading-copy">
           <p class="eyebrow">ENERGY ANALYTICS</p>
-
           <h1>Understand your<br class="mobile-break"> energy.</h1>
-
           <p class="page-description">
             A clear picture of your consumption, estimated costs and energy habits.
           </p>
@@ -133,7 +138,6 @@
           <span aria-hidden="true">＋</span>
           Calculate bill
         </a>
-
       </section>
 
       <!-- DATA NOTICE -->
@@ -246,7 +250,6 @@
       <section class="content-grid" id="analytics">
 
         <article class="panel chart-panel">
-
           <div class="panel-heading">
             <div>
               <p class="section-kicker">CONSUMPTION HISTORY</p>
@@ -258,7 +261,6 @@
           </div>
 
           <div class="chart-controls">
-
             <div class="chart-total">
               <strong id="chartTotal">43.5 <span>kWh</span></strong>
               <span id="chartCaption">Total this week</span>
@@ -277,7 +279,6 @@
                 Month
               </button>
             </div>
-
           </div>
 
           <div class="chart-container">
@@ -292,14 +293,11 @@
           <p class="chart-footnote">
             Sample readings · Consumption measured in kWh
           </p>
-
         </article>
 
         <!-- USAGE BREAKDOWN -->
         <article class="panel breakdown-panel">
-
           <div class="section-kicker">ILLUSTRATIVE DISTRIBUTION</div>
-
           <h2>Usage breakdown</h2>
 
           <p class="panel-description">
@@ -316,12 +314,10 @@
                 <span>Example</span>
                 <strong>100%</strong>
               </div>
-
             </div>
           </div>
 
           <div class="breakdown-list">
-
             <div class="breakdown-item">
               <span class="legend-dot dot-cyan"></span>
               <span>Cooling</span>
@@ -345,13 +341,11 @@
               <span>Other</span>
               <strong>15%</strong>
             </div>
-
           </div>
 
           <p class="tiny-note">
             These percentages are examples, not measured appliance-level data.
           </p>
-
         </article>
 
       </section>
@@ -361,9 +355,7 @@
 
         <!-- BILL CALCULATOR -->
         <article class="panel calculator-panel" id="calculator">
-
           <div class="panel-heading">
-
             <div>
               <p class="section-kicker">COST ESTIMATION</p>
               <h2>Bill calculator</h2>
@@ -373,11 +365,9 @@
             </div>
 
             <span class="metric-icon purple" aria-hidden="true">৳</span>
-
           </div>
 
           <form id="billForm" class="bill-form">
-
             <div class="form-field">
               <label for="units">Consumption <span>(kWh)</span></label>
 
@@ -415,32 +405,26 @@
             <button type="submit" class="primary-button calculate-button">
               Calculate estimate <span aria-hidden="true">→</span>
             </button>
-
           </form>
 
           <div class="estimate-result" id="estimateResult" aria-live="polite">
-
             <div>
               <span class="result-label">ESTIMATED ENERGY CHARGE</span>
               <strong id="estimatedBill">৳1,304.80</strong>
             </div>
 
             <span class="result-icon" aria-hidden="true">↗</span>
-
           </div>
 
           <p class="tiny-note">
             This is a simple flat-rate estimate, not a complete electricity bill.
             Actual bills may include tariff slabs, fixed charges, VAT and other adjustments.
           </p>
-
         </article>
 
         <!-- ENERGY INSIGHTS -->
         <article class="panel insights-panel" id="insights">
-
           <div class="panel-heading">
-
             <div>
               <p class="section-kicker">ENERGY OBSERVATIONS</p>
               <h2>Energy insights</h2>
@@ -450,11 +434,9 @@
             </div>
 
             <span class="insights-label">DEMO</span>
-
           </div>
 
           <div class="insight-item">
-
             <span class="insight-icon cyan" aria-hidden="true">↘</span>
 
             <div>
@@ -464,11 +446,9 @@
               </p>
               <span class="insight-type">DATA ANALYSIS</span>
             </div>
-
           </div>
 
           <div class="insight-item">
-
             <span class="insight-icon amber" aria-hidden="true">◷</span>
 
             <div>
@@ -478,11 +458,9 @@
               </p>
               <span class="insight-type">ENERGY TIP</span>
             </div>
-
           </div>
 
           <div class="insight-item">
-
             <span class="insight-icon green" aria-hidden="true">✓</span>
 
             <div>
@@ -492,18 +470,15 @@
               </p>
               <span class="insight-type">RECOMMENDATION</span>
             </div>
-
           </div>
 
           <div class="insights-footer">
             <span class="status-dot"></span>
             Rule-based demo · AI integration planned
           </div>
-
         </article>
 
       </section>
-
 
       <!-- PERSONAL READINGS -->
       <section class="panel readings-panel" id="readings" aria-labelledby="readingsTitle">
@@ -515,6 +490,7 @@
               Add electricity readings and save them securely to your account.
             </p>
           </div>
+
           <span class="metric-icon cyan" aria-hidden="true">▦</span>
         </div>
 
@@ -526,6 +502,7 @@
 
           <div class="form-field">
             <label for="readingUnits">Consumption <span>(kWh)</span></label>
+
             <input
               type="number"
               id="readingUnits"
@@ -547,6 +524,7 @@
           <div id="readingsSummary" class="readings-summary" aria-live="polite">
             Your saved readings will appear here.
           </div>
+
           <button type="button" id="exportReadings" class="primary-button">
             Export CSV <span aria-hidden="true">↓</span>
           </button>
@@ -561,6 +539,7 @@
                 <th scope="col">Actions</th>
               </tr>
             </thead>
+
             <tbody id="readingsTableBody">
               <tr>
                 <td colspan="3" class="empty-state">
@@ -579,15 +558,12 @@
 
       <!-- FOOTER -->
       <footer class="footer">
-
         <a href="#overview" class="footer-brand">
           lumora<span>.</span>
         </a>
 
         <p>Smarter Energy, Brighter Future.</p>
-
         <span>Engineering student project · Account-based readings</span>
-
       </footer>
 
     </main>
