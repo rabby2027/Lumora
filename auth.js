@@ -1,3 +1,4 @@
+
 /* LUMORA — Authentication, Registration & Email Verification */
 'use strict';
 
@@ -44,7 +45,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   function friendlyError(error) {
-    const text = error?.message || 'Something went wrong. Please try again.';
+    const text =
+      error?.message || 'Something went wrong. Please try again.';
 
     if (/already registered|already exists/i.test(text)) {
       return 'An account may already exist for this email. Try logging in instead.';
@@ -65,13 +67,28 @@ document.addEventListener('DOMContentLoaded', async () => {
     return text;
   }
 
+  // Check required HTML elements and Supabase configuration.
+  const requiredElements = [
+    notice, form, submitButton, firstName, lastName,
+    emailInput, passwordInput, nameFields, formTitle,
+    formIntro, loginTab, signupTab, tabs, formView,
+    successView, privacy, forgotWrap, passwordHint
+  ];
+
+  if (requiredElements.some(element => !element)) {
+    console.error('Lumora auth: one or more required HTML elements are missing.');
+    return;
+  }
+
   if (
     !config ||
+    !config.url ||
+    !config.publishableKey ||
     !window.supabase ||
     typeof window.supabase.createClient !== 'function'
   ) {
     showMessage(
-      'Lumora authentication could not load. Check supabase-config.js and refresh the page.',
+      'Authentication could not load. Please check supabase-config.js and refresh the page.',
       true
     );
     return;
@@ -92,28 +109,22 @@ document.addEventListener('DOMContentLoaded', async () => {
   const params = new URLSearchParams(window.location.search);
 
   /*
-   * If the verification link redirects back with verified=1,
-   * check whether Supabase has established a session.
+   * IMPORTANT:
+   * Do not redirect users away from auth.html just because
+   * a previous Supabase session exists.
    */
-  if (params.get('verified') === '1') {
-    const { data, error } = await supabaseClient.auth.getSession();
+  try {
+    const { error } = await supabaseClient.auth.getSession();
 
-    if (!error && data.session) {
-      window.location.replace('./index.html');
-      return;
+    if (error) {
+      console.warn('Session check:', error.message);
     }
-
-    currentMode = 'login';
-  } else {
-    const { data, error } = await supabaseClient.auth.getSession();
-
-    if (!error && data.session) {
-      window.location.replace('./index.html');
-      return;
-    }
-
-    currentMode = params.get('mode') === 'login' ? 'login' : 'signup';
+  } catch (error) {
+    console.warn('Unable to check the current session:', error);
   }
+
+  currentMode =
+    params.get('mode') === 'login' ? 'login' : 'signup';
 
   function setMode(mode) {
     currentMode = mode;
@@ -173,11 +184,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   setMode(currentMode);
 
   if (params.get('verified') === '1') {
+    setMode('login');
     showMessage(
       'Verification link opened. Please log in to continue. If verification did not complete, try the latest email link again.'
     );
   }
 
+  // Login tab
   loginTab.addEventListener('click', event => {
     event.preventDefault();
 
@@ -187,9 +200,17 @@ document.addEventListener('DOMContentLoaded', async () => {
       './auth.html?mode=login'
     );
 
+    if (successView.hidden === false) {
+      successView.hidden = true;
+      formView.hidden = false;
+      tabs.hidden = false;
+      privacy.hidden = false;
+    }
+
     setMode('login');
   });
 
+  // Signup tab
   signupTab.addEventListener('click', event => {
     event.preventDefault();
 
@@ -199,12 +220,17 @@ document.addEventListener('DOMContentLoaded', async () => {
       './auth.html?mode=signup'
     );
 
+    if (successView.hidden === false) {
+      successView.hidden = true;
+      formView.hidden = false;
+      tabs.hidden = false;
+      privacy.hidden = false;
+    }
+
     setMode('signup');
   });
 
-  /*
-   * Sign up and log in
-   */
+  // Login and signup form submission
   form.addEventListener('submit', async event => {
     event.preventDefault();
     clearMessage();
@@ -248,11 +274,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         : 'Creating account…';
 
     try {
-      /*
-       * LOGIN
-       */
       if (submittedMode === 'login') {
-        const { error } =
+        const { data, error } =
           await supabaseClient.auth.signInWithPassword({
             email,
             password
@@ -262,16 +285,19 @@ document.addEventListener('DOMContentLoaded', async () => {
           throw error;
         }
 
-        window.location.replace('./index.html');
+        if (!data.session) {
+          showMessage(
+            'Login did not create a session. Please try again.',
+            true
+          );
+          return;
+        }
+
+        window.location.assign('./index.html');
         return;
       }
 
-      /*
-       * SIGN UP
-       *
-       * First name and last name are stored in Supabase
-       * user metadata.
-       */
+      // Signup
       const first = firstName.value.trim();
       const last = lastName.value.trim();
 
@@ -298,28 +324,20 @@ document.addEventListener('DOMContentLoaded', async () => {
         throw error;
       }
 
-      /*
-       * If email confirmation is enabled, Supabase normally
-       * returns a user without a session. Show the verification
-       * screen only after the signup request succeeds.
-       */
       if (data.user && !data.session) {
         showConfirmation(email);
         return;
       }
 
-      /*
-       * If confirmation is disabled, Supabase may immediately
-       * create a session.
-       */
       if (data.session) {
-        window.location.replace('./index.html');
+        window.location.assign('./index.html');
         return;
       }
 
       showConfirmation(email);
 
     } catch (error) {
+      console.error('Lumora authentication error:', error);
       showMessage(friendlyError(error), true);
 
     } finally {
@@ -332,21 +350,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  /*
-   * Resend verification email
-   */
-  document
-    .getElementById('resendButton')
-    .addEventListener('click', async () => {
-      const button = document.getElementById('resendButton');
-      const hint = document.getElementById('resendHint');
+  // Resend email verification
+  const resendButton = document.getElementById('resendButton');
+  const resendHint = document.getElementById('resendHint');
 
+  if (resendButton && resendHint) {
+    resendButton.addEventListener('click', async () => {
       if (!pendingEmail) {
         return;
       }
 
-      button.disabled = true;
-      hint.textContent = 'Requesting a new verification email…';
+      resendButton.disabled = true;
+      resendHint.textContent =
+        'Requesting a new verification email…';
 
       try {
         const redirectUrl = new URL(
@@ -354,36 +370,35 @@ document.addEventListener('DOMContentLoaded', async () => {
           window.location.href
         ).href;
 
-        const { error } =
-          await supabaseClient.auth.resend({
-            type: 'signup',
-            email: pendingEmail,
-            options: {
-              emailRedirectTo: redirectUrl
-            }
-          });
+        const { error } = await supabaseClient.auth.resend({
+          type: 'signup',
+          email: pendingEmail,
+          options: {
+            emailRedirectTo: redirectUrl
+          }
+        });
 
         if (error) {
           throw error;
         }
 
-        hint.textContent =
+        resendHint.textContent =
           'A new verification email has been requested. Check your inbox and Spam/Junk folder.';
 
       } catch (error) {
-        hint.textContent = friendlyError(error);
+        resendHint.textContent = friendlyError(error);
 
       } finally {
-        button.disabled = false;
+        resendButton.disabled = false;
       }
     });
+  }
 
-  /*
-   * Forgot password
-   */
-  document
-    .getElementById('forgotLink')
-    .addEventListener('click', async event => {
+  // Forgot password
+  const forgotLink = document.getElementById('forgotLink');
+
+  if (forgotLink) {
+    forgotLink.addEventListener('click', async event => {
       event.preventDefault();
 
       const email = emailInput.value.trim().toLowerCase();
@@ -424,4 +439,5 @@ document.addEventListener('DOMContentLoaded', async () => {
         showMessage(friendlyError(error), true);
       }
     });
+  }
 });
