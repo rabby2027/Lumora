@@ -1,251 +1,427 @@
+/* LUMORA — Authentication, Registration & Email Verification */
+'use strict';
 
-(() => {
-  "use strict";
-
+document.addEventListener('DOMContentLoaded', async () => {
   const config = window.LUMORA_SUPABASE_CONFIG;
 
-  const form = document.getElementById("authForm");
-  const loginTab = document.getElementById("loginTab");
-  const signupTab = document.getElementById("signupTab");
-  const title = document.getElementById("formTitle");
-  const subtitle = document.getElementById("formSubtitle");
-  const emailInput = document.getElementById("email");
-  const passwordInput = document.getElementById("password");
-  const passwordHint = document.getElementById("passwordHint");
-  const submitButton = document.getElementById("submitButton");
-  const forgotLink = document.getElementById("forgotLink");
-  const messageBox = document.getElementById("message");
+  const notice = document.getElementById('notice');
+  const form = document.getElementById('authForm');
+  const submitButton = document.getElementById('submitButton');
 
-  let mode = "login";
-  let supabaseClient = null;
+  const firstName = document.getElementById('firstName');
+  const lastName = document.getElementById('lastName');
+  const emailInput = document.getElementById('email');
+  const passwordInput = document.getElementById('password');
 
-  function showMessage(message, type = "info") {
-    messageBox.textContent = message;
-    messageBox.className = `message show ${type}`;
+  const nameFields = document.getElementById('nameFields');
+  const formTitle = document.getElementById('formTitle');
+  const formIntro = document.getElementById('formIntro');
+
+  const loginTab = document.getElementById('loginTab');
+  const signupTab = document.getElementById('signupTab');
+  const tabs = document.getElementById('tabs');
+
+  const formView = document.getElementById('formView');
+  const successView = document.getElementById('successView');
+  const privacy = document.getElementById('privacy');
+
+  const forgotWrap = document.getElementById('forgotWrap');
+  const passwordHint = document.getElementById('passwordHint');
+
+  let currentMode = 'signup';
+  let pendingEmail = '';
+
+  function showMessage(text, isError = false) {
+    notice.textContent = text;
+    notice.classList.toggle('error', isError);
+    notice.style.display = 'block';
   }
 
   function clearMessage() {
-    messageBox.textContent = "";
-    messageBox.className = "message";
+    notice.textContent = '';
+    notice.style.display = 'none';
+    notice.classList.remove('error');
   }
 
-  function setLoading(loading, label) {
-    submitButton.disabled = loading;
-    submitButton.textContent = loading ? "Please wait..." : label;
-  }
+  function friendlyError(error) {
+    const text = error?.message || 'Something went wrong. Please try again.';
 
-  function setMode(nextMode) {
-    mode = nextMode;
-    clearMessage();
-
-    const isLogin = mode === "login";
-
-    loginTab.classList.toggle("active", isLogin);
-    signupTab.classList.toggle("active", !isLogin);
-    loginTab.setAttribute("aria-selected", String(isLogin));
-    signupTab.setAttribute("aria-selected", String(!isLogin));
-
-    title.textContent = isLogin ? "Welcome back" : "Create your account";
-    subtitle.textContent = isLogin
-      ? "Sign in to access your personal energy readings and insights."
-      : "Create a Lumora account to securely save your energy readings.";
-
-    passwordInput.autocomplete = isLogin ? "current-password" : "new-password";
-    passwordHint.textContent = isLogin
-      ? "Enter your account password."
-      : "Use at least 8 characters.";
-
-    forgotLink.style.display = isLogin ? "block" : "none";
-    setLoading(false, isLogin ? "Login to Lumora" : "Create account");
-  }
-
-  function getSafeDashboardUrl() {
-    return new URL("./index.html", window.location.href).href;
-  }
-
-  function getSafeAuthUrl() {
-    return new URL("./auth.html", window.location.href).href;
-  }
-
-  async function init() {
-    if (!config || !config.url || !config.publishableKey) {
-      showMessage(
-        "Supabase configuration is missing. Check supabase-config.js.",
-        "error"
-      );
-      submitButton.disabled = true;
-      return;
+    if (/already registered|already exists/i.test(text)) {
+      return 'An account may already exist for this email. Try logging in instead.';
     }
 
-    if (!window.supabase || typeof window.supabase.createClient !== "function") {
-      showMessage(
-        "Supabase library could not load. Refresh the page and try again.",
-        "error"
-      );
-      submitButton.disabled = true;
-      return;
+    if (/invalid login credentials/i.test(text)) {
+      return 'Incorrect email or password. Please check your details.';
     }
 
-    supabaseClient = window.supabase.createClient(
-      config.url,
-      config.publishableKey,
-      {
-        auth: {
-          persistSession: true,
-          autoRefreshToken: true,
-          detectSessionInUrl: true
-        }
-      }
+    if (/email not confirmed/i.test(text)) {
+      return 'Please verify your email before logging in. Check your inbox and Spam folder.';
+    }
+
+    if (/rate limit|too many requests/i.test(text)) {
+      return 'Too many requests. Please wait a little and try again.';
+    }
+
+    return text;
+  }
+
+  if (
+    !config ||
+    !window.supabase ||
+    typeof window.supabase.createClient !== 'function'
+  ) {
+    showMessage(
+      'Lumora authentication could not load. Check supabase-config.js and refresh the page.',
+      true
     );
+    return;
+  }
 
+  const supabaseClient = window.supabase.createClient(
+    config.url,
+    config.publishableKey,
+    {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true
+      }
+    }
+  );
+
+  const params = new URLSearchParams(window.location.search);
+
+  /*
+   * If the verification link redirects back with verified=1,
+   * check whether Supabase has established a session.
+   */
+  if (params.get('verified') === '1') {
     const { data, error } = await supabaseClient.auth.getSession();
 
-    if (error) {
-      showMessage("Could not check your session. Please try again.", "error");
+    if (!error && data.session) {
+      window.location.replace('./index.html');
       return;
     }
 
-    if (data.session) {
-      window.location.replace(getSafeDashboardUrl());
+    currentMode = 'login';
+  } else {
+    const { data, error } = await supabaseClient.auth.getSession();
+
+    if (!error && data.session) {
+      window.location.replace('./index.html');
       return;
     }
 
-    const params = new URLSearchParams(window.location.search);
-
-    if (params.get("type") === "recovery") {
-      showMessage(
-        "Password recovery link detected. Enter your new password below and choose Create account to continue is not supported here. Please use the password reset email flow.",
-        "info"
-      );
-    }
+    currentMode = params.get('mode') === 'login' ? 'login' : 'signup';
   }
 
-  loginTab.addEventListener("click", () => setMode("login"));
-  signupTab.addEventListener("click", () => setMode("signup"));
+  function setMode(mode) {
+    currentMode = mode;
 
-  form.addEventListener("submit", async (event) => {
+    const isLogin = mode === 'login';
+
+    loginTab.classList.toggle('active', isLogin);
+    signupTab.classList.toggle('active', !isLogin);
+
+    nameFields.hidden = isLogin;
+
+    firstName.required = !isLogin;
+    lastName.required = !isLogin;
+
+    formTitle.textContent = isLogin
+      ? 'Welcome back'
+      : 'Create your account';
+
+    formIntro.textContent = isLogin
+      ? 'Sign in to access your personal energy readings and insights.'
+      : 'Create a Lumora account to securely save your energy readings.';
+
+    submitButton.textContent = isLogin
+      ? 'Login to Lumora'
+      : 'Create account';
+
+    passwordInput.autocomplete = isLogin
+      ? 'current-password'
+      : 'new-password';
+
+    passwordInput.minLength = isLogin ? 1 : 8;
+
+    passwordInput.placeholder = isLogin
+      ? 'Enter your password'
+      : 'Create a password';
+
+    passwordHint.textContent = isLogin
+      ? 'Enter your account password.'
+      : 'Use at least 8 characters.';
+
+    forgotWrap.hidden = !isLogin;
+
+    clearMessage();
+  }
+
+  function showConfirmation(email) {
+    pendingEmail = email;
+
+    document.getElementById('sentEmail').textContent = email;
+
+    formView.hidden = true;
+    successView.hidden = false;
+    tabs.hidden = true;
+    privacy.hidden = true;
+  }
+
+  setMode(currentMode);
+
+  if (params.get('verified') === '1') {
+    showMessage(
+      'Verification link opened. Please log in to continue. If verification did not complete, try the latest email link again.'
+    );
+  }
+
+  loginTab.addEventListener('click', event => {
+    event.preventDefault();
+
+    history.replaceState(
+      null,
+      '',
+      './auth.html?mode=login'
+    );
+
+    setMode('login');
+  });
+
+  signupTab.addEventListener('click', event => {
+    event.preventDefault();
+
+    history.replaceState(
+      null,
+      '',
+      './auth.html?mode=signup'
+    );
+
+    setMode('signup');
+  });
+
+  /*
+   * Sign up and log in
+   */
+  form.addEventListener('submit', async event => {
     event.preventDefault();
     clearMessage();
 
-    if (!supabaseClient) {
-      showMessage("Supabase is not ready. Refresh and try again.", "error");
-      return;
-    }
-
-    const email = emailInput.value.trim();
+    const email = emailInput.value.trim().toLowerCase();
     const password = passwordInput.value;
 
     if (!email || !password) {
-      showMessage("Enter your email address and password.", "error");
+      showMessage(
+        'Please enter your email address and password.',
+        true
+      );
       return;
     }
 
-    if (password.length < 8) {
-      showMessage("Password must contain at least 8 characters.", "error");
+    if (
+      currentMode === 'signup' &&
+      (!firstName.value.trim() || !lastName.value.trim())
+    ) {
+      showMessage(
+        'Please enter both your first name and last name.',
+        true
+      );
       return;
     }
 
-    setLoading(true, "");
+    if (currentMode === 'signup' && password.length < 8) {
+      showMessage(
+        'Your password must contain at least 8 characters.',
+        true
+      );
+      return;
+    }
+
+    const submittedMode = currentMode;
+
+    submitButton.disabled = true;
+    submitButton.textContent =
+      submittedMode === 'login'
+        ? 'Logging in…'
+        : 'Creating account…';
 
     try {
-      if (mode === "signup") {
-        const { data, error } = await supabaseClient.auth.signUp({
+      /*
+       * LOGIN
+       */
+      if (submittedMode === 'login') {
+        const { error } =
+          await supabaseClient.auth.signInWithPassword({
+            email,
+            password
+          });
+
+        if (error) {
+          throw error;
+        }
+
+        window.location.replace('./index.html');
+        return;
+      }
+
+      /*
+       * SIGN UP
+       *
+       * First name and last name are stored in Supabase
+       * user metadata.
+       */
+      const first = firstName.value.trim();
+      const last = lastName.value.trim();
+
+      const redirectUrl = new URL(
+        './auth.html?verified=1',
+        window.location.href
+      ).href;
+
+      const { data, error } =
+        await supabaseClient.auth.signUp({
           email,
           password,
           options: {
-            emailRedirectTo: getSafeDashboardUrl()
+            emailRedirectTo: redirectUrl,
+            data: {
+              first_name: first,
+              last_name: last,
+              full_name: `${first} ${last}`
+            }
           }
         });
 
-        if (error) throw error;
+      if (error) {
+        throw error;
+      }
 
-        if (data.session) {
-          showMessage("Account created. Opening your dashboard...", "success");
-          window.location.replace(getSafeDashboardUrl());
-          return;
-        }
-
-        showMessage(
-          "Account request submitted. Check your email for a confirmation link before logging in.",
-          "success"
-        );
-        setMode("login");
-      } else {
-        const { data, error } = await supabaseClient.auth.signInWithPassword({
-          email,
-          password
-        });
-
-        if (error) throw error;
-
-        if (!data.session) {
-          showMessage("Login did not create a session. Please try again.", "error");
-          return;
-        }
-
-        showMessage("Login successful. Opening Lumora...", "success");
-        window.location.replace(getSafeDashboardUrl());
+      /*
+       * If email confirmation is enabled, Supabase normally
+       * returns a user without a session. Show the verification
+       * screen only after the signup request succeeds.
+       */
+      if (data.user && !data.session) {
+        showConfirmation(email);
         return;
       }
-    } catch (error) {
-      const rawMessage = String(error?.message || "").toLowerCase();
 
-      if (rawMessage.includes("invalid login credentials")) {
-        showMessage("Email or password is incorrect.", "error");
-      } else if (rawMessage.includes("already registered")) {
-        showMessage(
-          "This email already has an account. Switch to Login instead.",
-          "error"
-        );
-      } else if (rawMessage.includes("password")) {
-        showMessage(error.message, "error");
-      } else if (rawMessage.includes("rate limit")) {
-        showMessage("Too many attempts. Wait a while and try again.", "error");
-      } else {
-        showMessage(error.message || "Something went wrong. Please try again.", "error");
+      /*
+       * If confirmation is disabled, Supabase may immediately
+       * create a session.
+       */
+      if (data.session) {
+        window.location.replace('./index.html');
+        return;
       }
-    } finally {
-      setLoading(false, mode === "login" ? "Login to Lumora" : "Create account");
-    }
-  });
 
-  forgotLink.addEventListener("click", async (event) => {
-    event.preventDefault();
-    clearMessage();
+      showConfirmation(email);
 
-    if (!supabaseClient) {
-      showMessage("Supabase is not ready. Refresh and try again.", "error");
-      return;
-    }
-
-    const email = emailInput.value.trim();
-
-    if (!email) {
-      showMessage("Enter your email address first, then click Forgot password.", "info");
-      emailInput.focus();
-      return;
-    }
-
-    setLoading(true, "");
-
-    try {
-      const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
-        redirectTo: getSafeAuthUrl()
-      });
-
-      if (error) throw error;
-
-      showMessage(
-        "If an account exists for this address, a password reset email will be sent. Check your inbox.",
-        "success"
-      );
     } catch (error) {
-      showMessage(error.message || "Could not send the reset email.", "error");
+      showMessage(friendlyError(error), true);
+
     } finally {
-      setLoading(false, "Login to Lumora");
+      submitButton.disabled = false;
+
+      submitButton.textContent =
+        currentMode === 'login'
+          ? 'Login to Lumora'
+          : 'Create account';
     }
   });
 
-  setMode("login");
-  init();
-})();
+  /*
+   * Resend verification email
+   */
+  document
+    .getElementById('resendButton')
+    .addEventListener('click', async () => {
+      const button = document.getElementById('resendButton');
+      const hint = document.getElementById('resendHint');
+
+      if (!pendingEmail) {
+        return;
+      }
+
+      button.disabled = true;
+      hint.textContent = 'Requesting a new verification email…';
+
+      try {
+        const redirectUrl = new URL(
+          './auth.html?verified=1',
+          window.location.href
+        ).href;
+
+        const { error } =
+          await supabaseClient.auth.resend({
+            type: 'signup',
+            email: pendingEmail,
+            options: {
+              emailRedirectTo: redirectUrl
+            }
+          });
+
+        if (error) {
+          throw error;
+        }
+
+        hint.textContent =
+          'A new verification email has been requested. Check your inbox and Spam/Junk folder.';
+
+      } catch (error) {
+        hint.textContent = friendlyError(error);
+
+      } finally {
+        button.disabled = false;
+      }
+    });
+
+  /*
+   * Forgot password
+   */
+  document
+    .getElementById('forgotLink')
+    .addEventListener('click', async event => {
+      event.preventDefault();
+
+      const email = emailInput.value.trim().toLowerCase();
+
+      if (!email) {
+        showMessage(
+          'Enter your email address first, then click Forgot password.',
+          true
+        );
+
+        emailInput.focus();
+        return;
+      }
+
+      try {
+        const redirectUrl = new URL(
+          './auth.html?mode=login',
+          window.location.href
+        ).href;
+
+        const { error } =
+          await supabaseClient.auth.resetPasswordForEmail(
+            email,
+            {
+              redirectTo: redirectUrl
+            }
+          );
+
+        if (error) {
+          throw error;
+        }
+
+        showMessage(
+          'If an account exists for this email, a password reset link has been requested.'
+        );
+
+      } catch (error) {
+        showMessage(friendlyError(error), true);
+      }
+    });
+});
