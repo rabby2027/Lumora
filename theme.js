@@ -10,16 +10,13 @@
       bgSoft: "#EAF0F6",
       panel: "#FFFFFF",
       panelLight: "#F0F5F9",
-      accent: "#087E8B",
-      accentBright: "#0A9AA8",
-      secondary: "#16A085",
+      cyan: "#087E8B",
+      cyanBright: "#0A9AA8",
+      green: "#16A085",
       text: "#172B42",
       muted: "#63758B",
-      border: "rgba(35,76,105,.18)",
-      header: "rgba(244,247,251,.96)",
-      buttonText: "#FFFFFF",
-      shadow: "rgba(28,58,83,.10)",
-      glow: "rgba(8,126,139,.10)"
+      border: "rgba(35,76,105,.16)",
+      header: "rgba(244,247,251,.92)"
     },
 
     emerald: {
@@ -27,16 +24,13 @@
       bgSoft: "#0B241D",
       panel: "#112D25",
       panelLight: "#183B30",
-      accent: "#34D399",
-      accentBright: "#42E6A7",
-      secondary: "#B7F36B",
+      cyan: "#34D399",
+      cyanBright: "#42E6A7",
+      green: "#B7F36B",
       text: "#F0FFF7",
-      muted: "#B0D1C2",
-      border: "rgba(112,226,174,.20)",
-      header: "rgba(7,26,22,.96)",
-      buttonText: "#062219",
-      shadow: "rgba(0,0,0,.25)",
-      glow: "rgba(52,211,153,.11)"
+      muted: "#9AC6B4",
+      border: "rgba(112,226,174,.18)",
+      header: "rgba(7,26,22,.92)"
     },
 
     amethyst: {
@@ -44,420 +38,49 @@
       bgSoft: "#100C18",
       panel: "#191322",
       panelLight: "#241A31",
-      accent: "#B18CFF",
-      accentBright: "#C6A8FF",
-      secondary: "#E1A8FF",
+      cyan: "#B18CFF",
+      cyanBright: "#C6A8FF",
+      green: "#E1A8FF",
       text: "#F8F3FF",
-      muted: "#C2B6D3",
-      border: "rgba(190,157,255,.20)",
-      header: "rgba(9,7,14,.96)",
-      buttonText: "#160D26",
-      shadow: "rgba(0,0,0,.32)",
-      glow: "rgba(177,140,255,.12)"
+      muted: "#B4A7C8",
+      border: "rgba(190,157,255,.18)",
+      header: "rgba(9,7,14,.92)"
     }
   };
 
   const root = document.documentElement;
-  const STYLE_ID = "lumora-theme-styles";
-
-  const css = `
-    :root {
-      --bg: var(--lumora-bg);
-      --bg-soft: var(--lumora-bg-soft);
-      --panel: var(--lumora-panel);
-      --panel-light: var(--lumora-panel-light);
-      --cyan: var(--lumora-accent);
-      --cyan-bright: var(--lumora-accent-bright);
-      --green: var(--lumora-secondary);
-      --text: var(--lumora-text);
-      --muted: var(--lumora-muted);
-      --border: var(--lumora-border);
-    }
-
-    html[data-lumora-theme="arctic"] {
-      color-scheme: light;
-    }
-
-    html[data-lumora-theme="emerald"],
-    html[data-lumora-theme="amethyst"] {
-      color-scheme: dark;
-    }
-
-    body {
-      background: var(--lumora-bg) !important;
-      color: var(--lumora-text) !important;
-      transition: background-color .25s ease, color .25s ease;
-    }
-
-    body::before {
-      background:
-        radial-gradient(
-          ellipse at 15% 12%,
-          var(--lumora-glow),
-          transparent 38%
-        ),
-        radial-gradient(
-          ellipse at 88% 45%,
-          color-mix(in srgb, var(--lumora-secondary) 8%, transparent),
-          transparent 32%
-        ),
-        linear-gradient(
-          180deg,
-          var(--lumora-bg),
-          var(--lumora-bg-soft) 55%,
-          var(--lumora-bg)
-        ) !important;
-    }
-
-    .site-header {
-      background: var(--lumora-header) !important;
-      border-color: var(--lumora-border) !important;
-    }
-
-    .site-header .brand-name,
-    .site-header .nav-links a,
-    .site-header .login-link {
-      color: var(--lumora-text) !important;
-    }
-
-    .site-header .brand-name span {
-      color: var(--lumora-accent) !important;
-    }
-
-    .feature-card,
-    .auth-card,
-    .auth-panel,
-    .login-card,
-    .signup-card,
-    .dashboard-card,
-    .stat-card,
-    .chart-card,
-    .panel,
-    .card,
-    .reading-card,
-    .calculator-card {
-      background: var(--lumora-panel) !important;
-      border-color: var(--lumora-border) !important;
-      color: var(--lumora-text) !important;
-    }
-
-    .feature-card:hover {
-      background: var(--lumora-panel-light) !important;
-      border-color: var(--lumora-accent) !important;
-    }
-
-    .step-card {
-      background: linear-gradient(
-        180deg,
-        var(--lumora-panel),
-        transparent
-      ) !important;
-      border-color: var(--lumora-border) !important;
-    }
-
-    .about-mark {
-      background:
-        radial-gradient(
-          circle at 50% 45%,
-          var(--lumora-glow),
-          transparent 55%
-        ),
-        var(--lumora-panel) !important;
-      border-color: var(--lumora-border) !important;
-    }
-
-    /* CTA panel and heading contrast fix */
-    .cta-panel {
-      background:
-        radial-gradient(
-          ellipse at 50% 0%,
-          var(--lumora-glow),
-          transparent 65%
-        ),
-        linear-gradient(
-          135deg,
-          var(--lumora-panel-light),
-          var(--lumora-panel)
-        ) !important;
-      border-color: var(--lumora-border) !important;
-      color: var(--lumora-text) !important;
-    }
-
-    .cta-panel h2 {
-      color: var(--lumora-text) !important;
-      -webkit-text-fill-color: var(--lumora-text) !important;
-      opacity: 1 !important;
-      visibility: visible !important;
-    }
-
-    .cta-panel h2 .gradient-text {
-      color: var(--lumora-accent) !important;
-      background: none !important;
-      -webkit-background-clip: initial !important;
-      background-clip: initial !important;
-      -webkit-text-fill-color: var(--lumora-accent) !important;
-      opacity: 1 !important;
-    }
-
-    .cta-panel p {
-      color: var(--lumora-muted) !important;
-    }
-
-    .cta-panel .section-kicker {
-      color: var(--lumora-accent) !important;
-    }
-
-    /* General readable text */
-    h1, h2, h3, h4 {
-      color: var(--lumora-text);
-    }
-
-    .hero-description,
-    .section-heading p,
-    .feature-card p,
-    .step-card p,
-    .about-copy p,
-    .cta-panel p {
-      color: var(--lumora-muted) !important;
-    }
-
-    .section-kicker,
-    .feature-icon,
-    .step-number,
-    .about-point svg {
-      color: var(--lumora-accent) !important;
-    }
-
-    .eyebrow {
-      color: var(--lumora-accent) !important;
-      background: color-mix(
-        in srgb,
-        var(--lumora-accent) 9%,
-        transparent
-      ) !important;
-      border-color: var(--lumora-border) !important;
-    }
-
-    .gradient-text {
-      background: linear-gradient(
-        100deg,
-        var(--lumora-accent-bright),
-        var(--lumora-secondary)
-      ) !important;
-      -webkit-background-clip: text !important;
-      background-clip: text !important;
-      -webkit-text-fill-color: transparent !important;
-    }
-
-    .button-primary,
-    .btn-primary,
-    input[type="submit"] {
-      color: var(--lumora-button-text) !important;
-      background: linear-gradient(
-        135deg,
-        var(--lumora-accent-bright),
-        var(--lumora-accent)
-      ) !important;
-      border-color: transparent !important;
-    }
-
-    .button-outline,
-    .btn-outline {
-      color: var(--lumora-text) !important;
-      background: var(--lumora-panel) !important;
-      border-color: var(--lumora-border) !important;
-    }
-
-    input,
-    select,
-    textarea {
-      color: var(--lumora-text) !important;
-      background: var(--lumora-panel) !important;
-      border-color: var(--lumora-border) !important;
-    }
-
-    input::placeholder,
-    textarea::placeholder {
-      color: var(--lumora-muted) !important;
-    }
-
-    .site-footer {
-      background: var(--lumora-bg-soft) !important;
-      border-color: var(--lumora-border) !important;
-    }
-
-    .trust-strip,
-    .trust-strip strong,
-    .about-point,
-    .footer-links,
-    .footer-bottom,
-    .footer-brand p,
-    .hero-note,
-    .login-link,
-    .nav-links > a:not(.button) {
-      color: var(--lumora-muted) !important;
-    }
-
-    .footer-links a:hover,
-    .nav-links a:hover {
-      color: var(--lumora-accent) !important;
-    }
-
-    /* Customize button and theme picker */
-    #lumora-theme-widget {
-      position: fixed;
-      right: 22px;
-      bottom: 22px;
-      z-index: 99999;
-      font-family: "DM Sans", system-ui, sans-serif;
-    }
-
-    #lumora-theme-toggle {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 9px;
-      min-height: 46px;
-      padding: 0 17px;
-      border: 1px solid var(--lumora-border);
-      border-radius: 999px;
-      background: var(--lumora-panel);
-      color: var(--lumora-text);
-      box-shadow: 0 10px 30px var(--lumora-shadow);
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: transform .2s ease, border-color .2s ease;
-    }
-
-    #lumora-theme-toggle:hover {
-      border-color: var(--lumora-accent);
-      transform: translateY(-2px);
-    }
-
-    #lumora-theme-menu {
-      position: absolute;
-      right: 0;
-      bottom: 58px;
-      width: min(320px, calc(100vw - 28px));
-      padding: 15px;
-      border: 1px solid var(--lumora-border);
-      border-radius: 18px;
-      background: var(--lumora-panel);
-      color: var(--lumora-text);
-      box-shadow: 0 18px 55px var(--lumora-shadow);
-    }
-
-    #lumora-theme-menu[hidden] {
-      display: none !important;
-    }
-
-    .theme-menu-title {
-      margin: 2px 4px 4px;
-      color: var(--lumora-text);
-      font-size: 15px;
-      font-weight: 800;
-    }
-
-    .theme-menu-subtitle {
-      margin: 0 4px 13px;
-      color: var(--lumora-muted);
-      font-size: 11px;
-    }
-
-    .lumora-theme-option {
-      width: 100%;
-      display: flex;
-      align-items: center;
-      gap: 11px;
-      padding: 11px;
-      margin-top: 7px;
-      border: 1px solid var(--lumora-border);
-      border-radius: 12px;
-      text-align: left;
-      background: transparent;
-      color: var(--lumora-text);
-      cursor: pointer;
-    }
-
-    .lumora-theme-option:hover,
-    .lumora-theme-option[aria-pressed="true"] {
-      border-color: var(--lumora-accent);
-      background: var(--lumora-panel-light);
-    }
-
-    .theme-swatches {
-      display: flex;
-      flex-shrink: 0;
-      gap: 3px;
-    }
-
-    .theme-swatches i {
-      width: 13px;
-      height: 29px;
-      border-radius: 5px;
-      border: 1px solid rgba(127,127,127,.2);
-    }
-
-    .theme-option-copy {
-      display: grid;
-      gap: 2px;
-      flex: 1;
-    }
-
-    .theme-option-copy strong {
-      color: var(--lumora-text);
-      font-size: 12px;
-    }
-
-    .theme-option-copy small {
-      color: var(--lumora-muted);
-      font-size: 10px;
-    }
-
-    .theme-check {
-      color: var(--lumora-accent);
-      font-size: 16px;
-    }
-
-    @media (max-width: 480px) {
-      #lumora-theme-widget {
-        right: 12px;
-        bottom: 12px;
-      }
-
-      #lumora-theme-toggle {
-        min-height: 43px;
-        padding: 0 14px;
-      }
-
-      #lumora-theme-menu {
-        bottom: 53px;
-      }
-    }
-  `;
+  const styleId = "lumora-theme-fix";
 
   function applyTheme(key) {
     if (!themes[key]) key = "amethyst";
-    const theme = themes[key];
+
+    const t = themes[key];
 
     root.dataset.lumoraTheme = key;
 
     const variables = {
-      "--lumora-bg": theme.bg,
-      "--lumora-bg-soft": theme.bgSoft,
-      "--lumora-panel": theme.panel,
-      "--lumora-panel-light": theme.panelLight,
-      "--lumora-accent": theme.accent,
-      "--lumora-accent-bright": theme.accentBright,
-      "--lumora-secondary": theme.secondary,
-      "--lumora-text": theme.text,
-      "--lumora-muted": theme.muted,
-      "--lumora-border": theme.border,
-      "--lumora-header": theme.header,
-      "--lumora-button-text": theme.buttonText,
-      "--lumora-shadow": theme.shadow,
-      "--lumora-glow": theme.glow
+      "--bg": t.bg,
+      "--bg-soft": t.bgSoft,
+      "--panel": t.panel,
+      "--panel-light": t.panelLight,
+      "--cyan": t.cyan,
+      "--cyan-bright": t.cyanBright,
+      "--green": t.green,
+      "--text": t.text,
+      "--muted": t.muted,
+      "--border": t.border,
+
+      "--lumora-bg": t.bg,
+      "--lumora-bg-soft": t.bgSoft,
+      "--lumora-panel": t.panel,
+      "--lumora-panel-light": t.panelLight,
+      "--lumora-accent": t.cyan,
+      "--lumora-accent-bright": t.cyanBright,
+      "--lumora-secondary": t.green,
+      "--lumora-text": t.text,
+      "--lumora-muted": t.muted,
+      "--lumora-border": t.border,
+      "--lumora-header": t.header
     };
 
     Object.entries(variables).forEach(([name, value]) => {
@@ -466,17 +89,210 @@
 
     try {
       localStorage.setItem(STORAGE_KEY, key);
-    } catch (error) {
-      console.warn("Could not save Lumora theme.", error);
-    }
+    } catch (_) {}
 
     document.querySelectorAll("[data-theme-choice]").forEach(button => {
       const active = button.dataset.themeChoice === key;
       button.setAttribute("aria-pressed", String(active));
 
-      const check = button.querySelector(".theme-check");
-      if (check) check.textContent = active ? "✓" : "";
+      const mark = button.querySelector(".theme-check");
+      if (mark) mark.textContent = active ? "✓" : "";
     });
+  }
+
+  function addStyles() {
+    let style = document.getElementById(styleId);
+
+    if (!style) {
+      style = document.createElement("style");
+      style.id = styleId;
+      document.head.appendChild(style);
+    }
+
+    style.textContent = `
+      /* Keep the existing page layout and backgrounds intact. */
+
+      html[data-lumora-theme="arctic"] {
+        color-scheme: light;
+      }
+
+      html[data-lumora-theme="emerald"],
+      html[data-lumora-theme="amethyst"] {
+        color-scheme: dark;
+      }
+
+      /* CTA remains dark, so its heading must remain light. */
+      .cta-panel h2 {
+        color: #F2F8FF !important;
+        -webkit-text-fill-color: #F2F8FF !important;
+        opacity: 1 !important;
+      }
+
+      .cta-panel h2 .gradient-text {
+        background: linear-gradient(
+          100deg,
+          var(--cyan-bright),
+          var(--green)
+        ) !important;
+        -webkit-background-clip: text !important;
+        background-clip: text !important;
+        -webkit-text-fill-color: transparent !important;
+      }
+
+      .cta-panel .section-kicker {
+        color: var(--cyan) !important;
+      }
+
+      /* Arctic: make text readable on the light page background. */
+      html[data-lumora-theme="arctic"] body {
+        color: #172B42;
+      }
+
+      html[data-lumora-theme="arctic"] .hero-description,
+      html[data-lumora-theme="arctic"] .section-heading p,
+      html[data-lumora-theme="arctic"] .feature-card p,
+      html[data-lumora-theme="arctic"] .step-card p,
+      html[data-lumora-theme="arctic"] .about-copy p,
+      html[data-lumora-theme="arctic"] .about-point,
+      html[data-lumora-theme="arctic"] .trust-strip,
+      html[data-lumora-theme="arctic"] .footer-links,
+      html[data-lumora-theme="arctic"] .footer-bottom,
+      html[data-lumora-theme="arctic"] .footer-brand p {
+        color: #63758B !important;
+      }
+
+      html[data-lumora-theme="arctic"] .site-header .nav-links a,
+      html[data-lumora-theme="arctic"] .site-header .login-link {
+        color: #40566F !important;
+      }
+
+      /* Customize menu */
+      #lumora-theme-widget {
+        position: fixed;
+        right: 22px;
+        bottom: 22px;
+        z-index: 99999;
+        font-family: "DM Sans", sans-serif;
+      }
+
+      #lumora-theme-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+        min-height: 46px;
+        padding: 0 17px;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        background: var(--panel);
+        color: var(--text);
+        box-shadow: 0 10px 30px rgba(0,0,0,.12);
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      #lumora-theme-menu {
+        position: absolute;
+        right: 0;
+        bottom: 58px;
+        width: min(320px, calc(100vw - 28px));
+        padding: 15px;
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        background: var(--panel);
+        color: var(--text);
+        box-shadow: 0 18px 45px rgba(0,0,0,.16);
+      }
+
+      #lumora-theme-menu[hidden] {
+        display: none !important;
+      }
+
+      .theme-menu-title {
+        margin: 2px 4px 4px;
+        color: var(--text);
+        font-size: 15px;
+        font-weight: 800;
+      }
+
+      .theme-menu-subtitle {
+        margin: 0 4px 13px;
+        color: var(--muted);
+        font-size: 11px;
+      }
+
+      .lumora-theme-option {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        padding: 11px;
+        margin-top: 7px;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        text-align: left;
+        background: transparent;
+        color: var(--text);
+        cursor: pointer;
+      }
+
+      .lumora-theme-option:hover,
+      .lumora-theme-option[aria-pressed="true"] {
+        border-color: var(--cyan);
+        background: var(--panel-light);
+      }
+
+      .theme-swatches {
+        display: flex;
+        flex-shrink: 0;
+        gap: 3px;
+      }
+
+      .theme-swatches i {
+        width: 13px;
+        height: 29px;
+        border-radius: 5px;
+        border: 1px solid rgba(127,127,127,.2);
+      }
+
+      .theme-option-copy {
+        display: grid;
+        gap: 2px;
+        flex: 1;
+      }
+
+      .theme-option-copy strong {
+        color: var(--text);
+        font-size: 12px;
+      }
+
+      .theme-option-copy small {
+        color: var(--muted);
+        font-size: 10px;
+      }
+
+      .theme-check {
+        color: var(--cyan);
+        font-size: 16px;
+      }
+
+      @media (max-width: 480px) {
+        #lumora-theme-widget {
+          right: 12px;
+          bottom: 12px;
+        }
+
+        #lumora-theme-toggle {
+          min-height: 43px;
+          padding: 0 14px;
+        }
+
+        #lumora-theme-menu {
+          bottom: 53px;
+        }
+      }
+    `;
   }
 
   function createWidget() {
@@ -499,7 +315,7 @@
                 data-theme-choice="arctic"
                 aria-pressed="false"
                 type="button">
-          <span class="theme-swatches" aria-hidden="true">
+          <span class="theme-swatches">
             <i style="background:#F4F7FB"></i>
             <i style="background:#087E8B"></i>
             <i style="background:#172B42"></i>
@@ -515,7 +331,7 @@
                 data-theme-choice="emerald"
                 aria-pressed="false"
                 type="button">
-          <span class="theme-swatches" aria-hidden="true">
+          <span class="theme-swatches">
             <i style="background:#071A16"></i>
             <i style="background:#34D399"></i>
             <i style="background:#B7F36B"></i>
@@ -531,7 +347,7 @@
                 data-theme-choice="amethyst"
                 aria-pressed="false"
                 type="button">
-          <span class="theme-swatches" aria-hidden="true">
+          <span class="theme-swatches">
             <i style="background:#09070E"></i>
             <i style="background:#B18CFF"></i>
             <i style="background:#E1A8FF"></i>
@@ -559,9 +375,9 @@
     const menu = widget.querySelector("#lumora-theme-menu");
 
     toggle.addEventListener("click", () => {
-      const opening = menu.hidden;
-      menu.hidden = !opening;
-      toggle.setAttribute("aria-expanded", String(opening));
+      const open = menu.hidden;
+      menu.hidden = !open;
+      toggle.setAttribute("aria-expanded", String(open));
     });
 
     widget.querySelectorAll("[data-theme-choice]").forEach(button => {
@@ -588,26 +404,16 @@
   }
 
   function init() {
-    let style = document.getElementById(STYLE_ID);
+    addStyles();
 
-    if (!style) {
-      style = document.createElement("style");
-      style.id = STYLE_ID;
-      document.head.appendChild(style);
-    }
-
-    style.textContent = css;
-
-    let savedTheme = "amethyst";
+    let saved = "amethyst";
 
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored && themes[stored]) savedTheme = stored;
-    } catch (error) {
-      console.warn("Could not read Lumora theme.", error);
-    }
+      if (stored && themes[stored]) saved = stored;
+    } catch (_) {}
 
-    applyTheme(savedTheme);
+    applyTheme(saved);
     createWidget();
   }
 
