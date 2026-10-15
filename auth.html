@@ -1,4 +1,4 @@
-
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11,6 +11,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="icon" type="image/png" href="./lumora-icon.png">
 
   <style>
     :root {
@@ -107,6 +109,7 @@
       text-decoration: none;
       color: var(--muted);
       font-weight: 700;
+      cursor: pointer;
     }
 
     .tabs a.active {
@@ -340,7 +343,6 @@
         <div class="notice" id="notice" role="status" aria-live="polite"></div>
 
         <form id="authForm">
-
           <div class="names" id="nameFields">
             <div class="field">
               <label for="firstName">First name</label>
@@ -369,7 +371,6 @@
           </div>
 
           <button id="submitButton" type="submit">Create account</button>
-
         </form>
       </div>
 
@@ -412,14 +413,15 @@
     </p>
 
     <p class="back">
-      <a href="./index.html">← Back to Lumora dashboard</a>
+      <a href="./index.html">← Back to Lumora home</a>
     </p>
 
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="./supabase-config.js"></script>
-  <script src="./auth.js?v=20261015logo"></script>
-<script src="./theme.js"></script>
+  <script src="./auth.js?v=20261015fix2"></script>
+  <script src="./theme.js"></script>
 </body>
 </html>
+```
