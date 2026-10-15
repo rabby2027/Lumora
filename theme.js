@@ -18,8 +18,10 @@
       border: "rgba(35,76,105,.18)",
       header: "rgba(244,247,251,.96)",
       buttonText: "#FFFFFF",
-      shadow: "rgba(28,58,83,.10)"
+      shadow: "rgba(28,58,83,.10)",
+      glow: "rgba(8,126,139,.10)"
     },
+
     emerald: {
       bg: "#071A16",
       bgSoft: "#0B241D",
@@ -33,8 +35,10 @@
       border: "rgba(112,226,174,.20)",
       header: "rgba(7,26,22,.96)",
       buttonText: "#062219",
-      shadow: "rgba(0,0,0,.25)"
+      shadow: "rgba(0,0,0,.25)",
+      glow: "rgba(52,211,153,.11)"
     },
+
     amethyst: {
       bg: "#09070E",
       bgSoft: "#100C18",
@@ -48,9 +52,13 @@
       border: "rgba(190,157,255,.20)",
       header: "rgba(9,7,14,.96)",
       buttonText: "#160D26",
-      shadow: "rgba(0,0,0,.32)"
+      shadow: "rgba(0,0,0,.32)",
+      glow: "rgba(177,140,255,.12)"
     }
   };
+
+  const root = document.documentElement;
+  const STYLE_ID = "lumora-theme-styles";
 
   const css = `
     :root {
@@ -66,26 +74,39 @@
       --border: var(--lumora-border);
     }
 
-    html[data-lumora-theme="arctic"] { color-scheme: light; }
+    html[data-lumora-theme="arctic"] {
+      color-scheme: light;
+    }
+
     html[data-lumora-theme="emerald"],
-    html[data-lumora-theme="amethyst"] { color-scheme: dark; }
+    html[data-lumora-theme="amethyst"] {
+      color-scheme: dark;
+    }
 
     body {
       background: var(--lumora-bg) !important;
       color: var(--lumora-text) !important;
-      transition: background .25s ease, color .25s ease;
+      transition: background-color .25s ease, color .25s ease;
     }
 
     body::before {
       background:
-        radial-gradient(ellipse at 15% 12%,
-          color-mix(in srgb, var(--lumora-accent) 12%, transparent),
-          transparent 38%),
-        radial-gradient(ellipse at 88% 45%,
+        radial-gradient(
+          ellipse at 15% 12%,
+          var(--lumora-glow),
+          transparent 38%
+        ),
+        radial-gradient(
+          ellipse at 88% 45%,
           color-mix(in srgb, var(--lumora-secondary) 8%, transparent),
-          transparent 32%),
-        linear-gradient(180deg, var(--lumora-bg),
-          var(--lumora-bg-soft) 55%, var(--lumora-bg)) !important;
+          transparent 32%
+        ),
+        linear-gradient(
+          180deg,
+          var(--lumora-bg),
+          var(--lumora-bg-soft) 55%,
+          var(--lumora-bg)
+        ) !important;
     }
 
     .site-header {
@@ -103,14 +124,6 @@
       color: var(--lumora-accent) !important;
     }
 
-    .trust-strip strong,
-    .about-point,
-    .footer-links,
-    .footer-bottom,
-    .footer-brand p {
-      color: var(--lumora-muted) !important;
-    }
-
     .feature-card,
     .auth-card,
     .auth-panel,
@@ -125,7 +138,7 @@
     .calculator-card {
       background: var(--lumora-panel) !important;
       border-color: var(--lumora-border) !important;
-      color: var(--lumora-text);
+      color: var(--lumora-text) !important;
     }
 
     .feature-card:hover {
@@ -135,42 +148,66 @@
 
     .step-card {
       background: linear-gradient(
-        180deg, var(--lumora-panel), transparent
+        180deg,
+        var(--lumora-panel),
+        transparent
       ) !important;
       border-color: var(--lumora-border) !important;
     }
 
     .about-mark {
-      background: radial-gradient(
-        circle at 50% 45%,
-        color-mix(in srgb, var(--lumora-accent) 15%, transparent),
-        transparent 55%
-      ), var(--lumora-panel) !important;
+      background:
+        radial-gradient(
+          circle at 50% 45%,
+          var(--lumora-glow),
+          transparent 55%
+        ),
+        var(--lumora-panel) !important;
       border-color: var(--lumora-border) !important;
     }
 
+    /* CTA panel and heading contrast fix */
     .cta-panel {
-      background: radial-gradient(
-        ellipse at 50% 0%,
-        color-mix(in srgb, var(--lumora-accent) 15%, transparent),
-        transparent 65%
-      ), linear-gradient(
-        135deg, var(--lumora-panel-light), var(--lumora-panel)
-      ) !important;
+      background:
+        radial-gradient(
+          ellipse at 50% 0%,
+          var(--lumora-glow),
+          transparent 65%
+        ),
+        linear-gradient(
+          135deg,
+          var(--lumora-panel-light),
+          var(--lumora-panel)
+        ) !important;
       border-color: var(--lumora-border) !important;
+      color: var(--lumora-text) !important;
     }
 
-    .cta-panel h2,
-    .cta-panel h3,
-    .cta-panel p,
-    .cta-panel .section-kicker {
+    .cta-panel h2 {
       color: var(--lumora-text) !important;
+      -webkit-text-fill-color: var(--lumora-text) !important;
+      opacity: 1 !important;
+      visibility: visible !important;
+    }
+
+    .cta-panel h2 .gradient-text {
+      color: var(--lumora-accent) !important;
+      background: none !important;
+      -webkit-background-clip: initial !important;
+      background-clip: initial !important;
+      -webkit-text-fill-color: var(--lumora-accent) !important;
+      opacity: 1 !important;
+    }
+
+    .cta-panel p {
+      color: var(--lumora-muted) !important;
     }
 
     .cta-panel .section-kicker {
       color: var(--lumora-accent) !important;
     }
 
+    /* General readable text */
     h1, h2, h3, h4 {
       color: var(--lumora-text);
     }
@@ -194,13 +231,14 @@
     .eyebrow {
       color: var(--lumora-accent) !important;
       background: color-mix(
-        in srgb, var(--lumora-accent) 9%, transparent
+        in srgb,
+        var(--lumora-accent) 9%,
+        transparent
       ) !important;
       border-color: var(--lumora-border) !important;
     }
 
     .gradient-text {
-      color: var(--lumora-accent) !important;
       background: linear-gradient(
         100deg,
         var(--lumora-accent-bright),
@@ -230,7 +268,9 @@
       border-color: var(--lumora-border) !important;
     }
 
-    input, select, textarea {
+    input,
+    select,
+    textarea {
       color: var(--lumora-text) !important;
       background: var(--lumora-panel) !important;
       border-color: var(--lumora-border) !important;
@@ -246,6 +286,24 @@
       border-color: var(--lumora-border) !important;
     }
 
+    .trust-strip,
+    .trust-strip strong,
+    .about-point,
+    .footer-links,
+    .footer-bottom,
+    .footer-brand p,
+    .hero-note,
+    .login-link,
+    .nav-links > a:not(.button) {
+      color: var(--lumora-muted) !important;
+    }
+
+    .footer-links a:hover,
+    .nav-links a:hover {
+      color: var(--lumora-accent) !important;
+    }
+
+    /* Customize button and theme picker */
     #lumora-theme-widget {
       position: fixed;
       right: 22px;
@@ -257,6 +315,7 @@
     #lumora-theme-toggle {
       display: flex;
       align-items: center;
+      justify-content: center;
       gap: 9px;
       min-height: 46px;
       padding: 0 17px;
@@ -268,6 +327,7 @@
       font-size: 13px;
       font-weight: 700;
       cursor: pointer;
+      transition: transform .2s ease, border-color .2s ease;
     }
 
     #lumora-theme-toggle:hover {
@@ -379,25 +439,26 @@
 
   function applyTheme(key) {
     if (!themes[key]) key = "amethyst";
-    const t = themes[key];
-
-    const variables = {
-      "--lumora-bg": t.bg,
-      "--lumora-bg-soft": t.bgSoft,
-      "--lumora-panel": t.panel,
-      "--lumora-panel-light": t.panelLight,
-      "--lumora-accent": t.accent,
-      "--lumora-accent-bright": t.accentBright,
-      "--lumora-secondary": t.secondary,
-      "--lumora-text": t.text,
-      "--lumora-muted": t.muted,
-      "--lumora-border": t.border,
-      "--lumora-header": t.header,
-      "--lumora-button-text": t.buttonText,
-      "--lumora-shadow": t.shadow
-    };
+    const theme = themes[key];
 
     root.dataset.lumoraTheme = key;
+
+    const variables = {
+      "--lumora-bg": theme.bg,
+      "--lumora-bg-soft": theme.bgSoft,
+      "--lumora-panel": theme.panel,
+      "--lumora-panel-light": theme.panelLight,
+      "--lumora-accent": theme.accent,
+      "--lumora-accent-bright": theme.accentBright,
+      "--lumora-secondary": theme.secondary,
+      "--lumora-text": theme.text,
+      "--lumora-muted": theme.muted,
+      "--lumora-border": theme.border,
+      "--lumora-header": theme.header,
+      "--lumora-button-text": theme.buttonText,
+      "--lumora-shadow": theme.shadow,
+      "--lumora-glow": theme.glow
+    };
 
     Object.entries(variables).forEach(([name, value]) => {
       root.style.setProperty(name, value);
@@ -406,7 +467,7 @@
     try {
       localStorage.setItem(STORAGE_KEY, key);
     } catch (error) {
-      console.warn("Lumora theme could not be saved.", error);
+      console.warn("Could not save Lumora theme.", error);
     }
 
     document.querySelectorAll("[data-theme-choice]").forEach(button => {
@@ -425,8 +486,10 @@
     widget.id = "lumora-theme-widget";
 
     widget.innerHTML = `
-      <div id="lumora-theme-menu" role="dialog"
-           aria-label="Choose website theme" hidden>
+      <div id="lumora-theme-menu"
+           role="dialog"
+           aria-label="Choose website theme"
+           hidden>
         <div class="theme-menu-title">Customize appearance</div>
         <div class="theme-menu-subtitle">
           Choose your Lumora theme.
@@ -434,7 +497,8 @@
 
         <button class="lumora-theme-option"
                 data-theme-choice="arctic"
-                aria-pressed="false" type="button">
+                aria-pressed="false"
+                type="button">
           <span class="theme-swatches" aria-hidden="true">
             <i style="background:#F4F7FB"></i>
             <i style="background:#087E8B"></i>
@@ -449,7 +513,8 @@
 
         <button class="lumora-theme-option"
                 data-theme-choice="emerald"
-                aria-pressed="false" type="button">
+                aria-pressed="false"
+                type="button">
           <span class="theme-swatches" aria-hidden="true">
             <i style="background:#071A16"></i>
             <i style="background:#34D399"></i>
@@ -464,7 +529,8 @@
 
         <button class="lumora-theme-option"
                 data-theme-choice="amethyst"
-                aria-pressed="false" type="button">
+                aria-pressed="false"
+                type="button">
           <span class="theme-swatches" aria-hidden="true">
             <i style="background:#09070E"></i>
             <i style="background:#B18CFF"></i>
@@ -478,10 +544,12 @@
         </button>
       </div>
 
-      <button id="lumora-theme-toggle" type="button"
+      <button id="lumora-theme-toggle"
+              type="button"
               aria-expanded="false"
               aria-controls="lumora-theme-menu">
-        <span aria-hidden="true">◐</span> Customize
+        <span aria-hidden="true">◐</span>
+        Customize
       </button>
     `;
 
@@ -520,23 +588,26 @@
   }
 
   function init() {
-    if (!document.getElementById("lumora-theme-styles")) {
-      const style = document.createElement("style");
-      style.id = "lumora-theme-styles";
-      style.textContent = css;
+    let style = document.getElementById(STYLE_ID);
+
+    if (!style) {
+      style = document.createElement("style");
+      style.id = STYLE_ID;
       document.head.appendChild(style);
     }
 
-    let saved = "amethyst";
+    style.textContent = css;
+
+    let savedTheme = "amethyst";
 
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored && themes[stored]) saved = stored;
+      if (stored && themes[stored]) savedTheme = stored;
     } catch (error) {
-      console.warn("Lumora theme preference could not be read.", error);
+      console.warn("Could not read Lumora theme.", error);
     }
 
-    applyTheme(saved);
+    applyTheme(savedTheme);
     createWidget();
   }
 
