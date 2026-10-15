@@ -1,0 +1,239 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lumora 3D Energy Globe</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#091321;color:#eafaff;font-family:Arial,sans-serif}
+#scene{position:absolute;inset:0}
+.hud{position:absolute;z-index:2;pointer-events:none;text-shadow:0 0 14px #00dfff}
+.top{top:20px;left:20px}
+.brand{font-size:12px;letter-spacing:4px;color:#70eaff}
+h1{font-size:clamp(21px,4vw,32px);margin:8px 0}
+.sub{font-size:11px;color:#9bb9d0;letter-spacing:1px}
+.metric{position:absolute;z-index:2;right:18px;padding:12px 15px;border:1px solid #2d637c;border-radius:12px;background:#0c1c2ddd;box-shadow:0 0 22px #00cfff12}
+.m1{top:24%}.m2{top:43%}.m3{top:62%}
+.label{font-size:10px;letter-spacing:2px;color:#8fb7ce}
+.value{font-size:23px;font-weight:700;color:#7deeff;margin-top:4px}
+.note{font-size:9px;color:#8ba9be;margin-top:4px}
+.bottom{left:20px;bottom:20px;font-size:10px;color:#8fb7ce;letter-spacing:1px}
+.pulse{display:inline-block;width:7px;height:7px;border-radius:50%;background:#61f7d4;box-shadow:0 0 12px #61f7d4;margin-right:8px}
+@media(max-width:520px){
+ .top{top:14px;left:14px}.metric{right:10px;padding:9px 10px}
+ .m1{top:32%}.m2{top:49%}.m3{top:66%}
+ .value{font-size:18px}.label{font-size:8px}
+ .bottom{left:14px;bottom:14px;font-size:9px;max-width:52%}
+}
+</style>
+</head>
+<body>
+<div id="scene"></div>
+
+<div class="hud top">
+  <div class="brand">LUMORA / ENERGY INTELLIGENCE</div>
+  <h1>Powering a <span style="color:#65e8ff">Brighter</span><br>Connected World.</h1>
+  <div class="sub">3D ENERGY VISUALIZATION</div>
+</div>
+
+<div class="metric m1">
+  <div class="label">GRID VOLTAGE</div>
+  <div class="value">230 <small style="font-size:12px">V</small></div>
+  <div class="note">Illustrative demo</div>
+</div>
+<div class="metric m2">
+  <div class="label">ENERGY FLOW</div>
+  <div class="value">3.8 <small style="font-size:12px">kW</small></div>
+  <div class="note">Illustrative demo</div>
+</div>
+<div class="metric m3">
+  <div class="label">CONSUMPTION</div>
+  <div class="value">248.6 <small style="font-size:12px">kWh</small></div>
+  <div class="note">Sample data only</div>
+</div>
+
+<div class="hud bottom"><span class="pulse"></span>ROTATING PLANET · ENERGY NETWORK SIMULATION</div>
+
+<script type="module">
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+
+const host = document.getElementById('scene');
+const scene = new THREE.Scene();
+scene.background = new THREE.Color('#091321');
+
+const camera = new THREE.PerspectiveCamera(42, innerWidth/innerHeight, 0.1, 100);
+camera.position.set(0, 0, 5.5);
+
+const renderer = new THREE.WebGLRenderer({antialias:true,alpha:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.setSize(innerWidth,innerHeight);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+host.appendChild(renderer.domElement);
+
+scene.add(new THREE.AmbientLight(0x8bbcff,1.6));
+
+const key = new THREE.DirectionalLight(0x9beaff,3.2);
+key.position.set(-3,2,4);
+scene.add(key);
+
+const rim = new THREE.PointLight(0x00bfff,30,12);
+rim.position.set(2,-1,-3);
+scene.add(rim);
+
+const planet = new THREE.Group();
+scene.add(planet);
+
+const loader = new THREE.TextureLoader();
+const earthGeometry = new THREE.SphereGeometry(1.42,80,80);
+
+const earthMaterial = new THREE.MeshPhongMaterial({
+  color:0x9edfff,
+  shininess:18,
+  specular:0x2b9acb
+});
+
+const earth = new THREE.Mesh(earthGeometry,earthMaterial);
+planet.add(earth);
+
+loader.load(
+ 'https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg',
+ texture => {
+   texture.colorSpace = THREE.SRGBColorSpace;
+   earthMaterial.map = texture;
+   earthMaterial.color.set(0xffffff);
+   earthMaterial.needsUpdate = true;
+ },
+ undefined,
+ () => { earthMaterial.color.set(0x14517a); }
+);
+
+const cloudsMaterial = new THREE.MeshPhongMaterial({
+  color:0x68dfff,
+  transparent:true,
+  opacity:0.12,
+  wireframe:true
+});
+const clouds = new THREE.Mesh(
+  new THREE.SphereGeometry(1.445,32,32),
+  cloudsMaterial
+);
+planet.add(clouds);
+
+const atmosphere = new THREE.Mesh(
+  new THREE.SphereGeometry(1.51,48,48),
+  new THREE.MeshBasicMaterial({
+    color:0x19bfff,
+    transparent:true,
+    opacity:0.09,
+    side:THREE.BackSide
+  })
+);
+planet.add(atmosphere);
+
+const starsGeometry = new THREE.BufferGeometry();
+const starPositions = [];
+for(let i=0;i<900;i++){
+  starPositions.push(
+    (Math.random()-.5)*18,
+    (Math.random()-.5)*12,
+    -2-Math.random()*9
+  );
+}
+starsGeometry.setAttribute(
+ 'position',
+ new THREE.Float32BufferAttribute(starPositions,3)
+);
+scene.add(new THREE.Points(
+ starsGeometry,
+ new THREE.PointsMaterial({color:0x9edfff,size:0.018,transparent:true,opacity:0.75})
+));
+
+function point(lat,lon,r=1.46){
+  const a=THREE.MathUtils.degToRad(90-lat);
+  const b=THREE.MathUtils.degToRad(lon+90);
+  return new THREE.Vector3(
+    -r*Math.sin(a)*Math.cos(b),
+     r*Math.cos(a),
+     r*Math.sin(a)*Math.sin(b)
+  );
+}
+
+function makeRoute(lat1,lon1,lat2,lon2){
+  const start=point(lat1,lon1);
+  const end=point(lat2,lon2);
+  const middle=start.clone().add(end).multiplyScalar(.5).normalize().multiplyScalar(2.05);
+  const curve=new THREE.QuadraticBezierCurve3(start,middle,end);
+  const path=curve.getPoints(100);
+  const line=new THREE.Line(
+    new THREE.BufferGeometry().setFromPoints(path),
+    new THREE.LineBasicMaterial({color:0x27dfff,transparent:true,opacity:.72})
+  );
+  planet.add(line);
+
+  const pulse=new THREE.Mesh(
+    new THREE.SphereGeometry(.035,12,12),
+    new THREE.MeshBasicMaterial({color:0xafffff})
+  );
+  planet.add(pulse);
+  return {curve,pulse,phase:Math.random()};
+}
+
+const routes=[
+  makeRoute(25,80,51,10),
+  makeRoute(35,-100,-20,-60),
+  makeRoute(1,103,37,127),
+  makeRoute(-30,151,20,78),
+  makeRoute(48,-5,28,77),
+  makeRoute(0,-20,30,30)
+];
+
+const nodes=[];
+[[25,80],[51,10],[35,-100],[-20,-60],[1,103],[37,127],[-30,151],[20,78],[48,-5],[28,77]]
+.forEach(([lat,lon])=>{
+  const dot=new THREE.Mesh(
+    new THREE.SphereGeometry(.035,12,12),
+    new THREE.MeshBasicMaterial({color:0x80f4ff})
+  );
+  dot.position.copy(point(lat,lon,1.47));
+  planet.add(dot);
+  nodes.push(dot);
+});
+
+const clock=new THREE.Clock();
+
+function resize(){
+  camera.aspect=innerWidth/innerHeight;
+  camera.position.x=innerWidth<600?.18:0;
+  camera.position.z=innerWidth<600?6.1:5.5;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth,innerHeight);
+}
+addEventListener('resize',resize);
+resize();
+
+function animate(){
+  requestAnimationFrame(animate);
+  const t=clock.getElapsedTime();
+
+  planet.rotation.y=t*.11;
+  clouds.rotation.y=-t*.035;
+  clouds.rotation.x=Math.sin(t*.1)*.025;
+
+  routes.forEach(route=>{
+    const p=(t*.12+route.phase)%1;
+    route.pulse.position.copy(route.curve.getPoint(p));
+  });
+
+  nodes.forEach((node,i)=>{
+    const glow=0.8+Math.sin(t*2+i)*.2;
+    node.scale.setScalar(glow);
+  });
+
+  renderer.render(scene,camera);
+}
+animate();
+</script>
+</body>
+</html>
