@@ -4,46 +4,46 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lumora — Global Power Grid</title>
+<title>Lumora — Balanced Energy Network</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-html,body,#scene{width:100%;height:100%;overflow:hidden;background:#06111f}
+html,body,#scene{width:100%;height:100%;overflow:hidden;background:#071321}
 body{font-family:Arial,Helvetica,sans-serif}
 #scene{position:absolute;inset:0}
 canvas{display:block}
-.heading{position:absolute;z-index:2;top:25px;left:27px;pointer-events:none}
-.eyebrow{color:#65eaff;font-size:11px;font-weight:bold;letter-spacing:3.5px;margin-bottom:10px}
-h1{font-size:clamp(23px,3.7vw,36px);line-height:1.12;color:#eafaff;letter-spacing:-1px;text-shadow:0 0 20px #00a9db66}
+.heading{position:absolute;top:25px;left:27px;z-index:2;pointer-events:none}
+.eyebrow{color:#67eaff;font-size:11px;font-weight:bold;letter-spacing:3px;margin-bottom:10px}
+h1{color:#eafaff;font-size:clamp(24px,3.7vw,36px);line-height:1.13;letter-spacing:-1px;text-shadow:0 0 20px #00a9db44}
 h1 span{color:#60e8ff}
-.subtitle{font-size:11px;letter-spacing:1.7px;color:#8db9d0;margin-top:10px}
-.metrics{position:absolute;z-index:3;right:23px;top:50%;transform:translateY(-40%);width:158px;display:grid;gap:12px;pointer-events:none}
-.metric{padding:13px 14px;border:1px solid #35cafa66;border-radius:15px;background:#091b2be8;backdrop-filter:blur(10px)}
-.label{font-size:10px;color:#94bfd4;letter-spacing:1.4px}
-.value{font-size:27px;font-weight:bold;color:#79efff;margin-top:5px}
+.subtitle{margin-top:10px;color:#8db9d0;font-size:10px;letter-spacing:1.6px}
+.metrics{position:absolute;top:50%;right:22px;transform:translateY(-38%);z-index:3;width:154px;display:grid;gap:11px;pointer-events:none}
+.metric{padding:12px 13px;border:1px solid #35cafa55;border-radius:14px;background:#091b2be8;backdrop-filter:blur(10px)}
+.label{font-size:9px;color:#94bfd4;letter-spacing:1.2px}
+.value{margin-top:5px;color:#79efff;font-size:26px;font-weight:bold}
 .unit{font-size:12px}
-.note{font-size:10px;color:#8daabd;margin-top:4px}
-.legend{position:absolute;bottom:45px;left:25px;z-index:2;display:grid;gap:7px;font-size:9px;letter-spacing:.7px;color:#87adbf;pointer-events:none}
+.note{margin-top:4px;color:#8daabd;font-size:9px}
+.legend{position:absolute;bottom:49px;left:25px;z-index:2;display:grid;gap:7px;color:#83a9bc;font-size:9px;letter-spacing:.5px;pointer-events:none}
 .legend span{display:flex;align-items:center;gap:7px}
-.legend i{display:inline-block;width:17px;height:2px;background:#29cfff;box-shadow:0 0 7px #29cfff}
-.legend .bright{background:#a4fff5;box-shadow:0 0 8px #a4fff5}
-.footer{position:absolute;z-index:2;bottom:18px;left:24px;right:24px;display:flex;justify-content:space-between;color:#84a9bc;font-size:9px;letter-spacing:1px;pointer-events:none}
+.legend i{width:16px;height:2px;display:inline-block;background:#29cfff;box-shadow:0 0 5px #29cfff}
+.legend .bright{background:#8bfff0;box-shadow:0 0 5px #8bfff0}
+.footer{position:absolute;bottom:18px;left:24px;right:24px;z-index:2;display:flex;justify-content:space-between;gap:8px;color:#83a9bc;font-size:9px;letter-spacing:.7px;pointer-events:none}
 .live{display:flex;align-items:center;gap:7px}
-.dot{width:7px;height:7px;background:#6effd7;border-radius:50%;box-shadow:0 0 10px #6effd7;animation:blink 1.3s infinite}
-.frame{position:absolute;z-index:4;inset:13px;border:1px solid #4dc8ef30;border-radius:23px;pointer-events:none}
-@keyframes blink{50%{opacity:.35}}
+.dot{width:6px;height:6px;border-radius:50%;background:#6effd7;box-shadow:0 0 8px #6effd7;animation:blink 1.6s infinite}
+.frame{position:absolute;inset:13px;z-index:4;border:1px solid #4dc8ef30;border-radius:23px;pointer-events:none}
+@keyframes blink{50%{opacity:.45}}
 @media(max-width:620px){
-.heading{top:23px;left:22px}
+.heading{top:22px;left:20px}
 .eyebrow{font-size:9px;letter-spacing:2px}
 h1{font-size:26px}
 .subtitle{font-size:9px}
-.metrics{top:auto;bottom:65px;right:19px;transform:none;width:126px;gap:7px}
-.metric{padding:9px;border-radius:11px}
-.label{font-size:8px;letter-spacing:.7px}
-.value{font-size:22px}
+.metrics{top:auto;right:17px;bottom:68px;transform:none;width:122px;gap:7px}
+.metric{padding:9px;border-radius:10px}
+.label{font-size:8px;letter-spacing:.6px}
+.value{font-size:21px}
 .note{font-size:8px}
-.legend{left:21px;bottom:45px;font-size:8px;gap:6px}
-.footer{left:21px;right:21px;font-size:8px}
-.frame{inset:8px;border-radius:17px}
+.legend{left:20px;bottom:47px;font-size:8px;gap:6px}
+.footer{left:20px;right:20px;font-size:8px}
+.frame{inset:8px;border-radius:16px}
 }
 @media(prefers-reduced-motion:reduce){.dot{animation:none}}
 </style>
@@ -54,7 +54,7 @@ h1{font-size:26px}
 <div class="heading">
   <div class="eyebrow">LUMORA / ENERGY INTELLIGENCE</div>
   <h1>Powering a <span>Brighter</span><br>Connected World.</h1>
-  <div class="subtitle">ULTRA-DENSE GLOBAL ENERGY NETWORK</div>
+  <div class="subtitle">GLOBAL ELECTRICITY NETWORK</div>
 </div>
 
 <div class="metrics">
@@ -76,13 +76,13 @@ h1{font-size:26px}
 </div>
 
 <div class="legend">
-  <span><i></i> DENSE GRID CONNECTIONS</span>
-  <span><i class="bright"></i> MOVING ENERGY PULSES</span>
+  <span><i></i> GRID TRANSMISSION LINES</span>
+  <span><i class="bright"></i> ENERGY PULSES</span>
 </div>
 
 <div class="footer">
   <span class="live"><i class="dot"></i> ROTATING PLANET</span>
-  <span>GLOBAL POWER NETWORK</span>
+  <span>POWERING TOMORROW</span>
 </div>
 <div class="frame"></div>
 
@@ -92,10 +92,10 @@ import * as THREE from
 
 const container = document.getElementById("scene");
 const scene = new THREE.Scene();
-scene.background = new THREE.Color("#06111f");
+scene.background = new THREE.Color("#071321");
 
 const camera = new THREE.PerspectiveCamera(
-  43, window.innerWidth / window.innerHeight, 0.1, 100
+  43, innerWidth / innerHeight, 0.1, 100
 );
 camera.position.z = 8.8;
 
@@ -103,24 +103,22 @@ const renderer = new THREE.WebGLRenderer({
   antialias: true,
   powerPreference: "high-performance"
 });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
-renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.5));
+renderer.setSize(innerWidth, innerHeight);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 container.appendChild(renderer.domElement);
 
 const earthGroup = new THREE.Group();
 scene.add(earthGroup);
+const R = 2.25;
 
-const R = 2.28;
-
-// Earth surface
 const earthMaterial = new THREE.MeshPhongMaterial({
-  color: 0x1c6fa5,
-  shininess: 22,
-  specular: new THREE.Color(0x163f63)
+  color: 0x236b9b,
+  shininess: 20,
+  specular: new THREE.Color(0x163e62)
 });
 const earth = new THREE.Mesh(
-  new THREE.SphereGeometry(R, 72, 56),
+  new THREE.SphereGeometry(R, 64, 48),
   earthMaterial
 );
 earthGroup.add(earth);
@@ -132,47 +130,39 @@ new THREE.TextureLoader().load(
     earthMaterial.map = texture;
     earthMaterial.color.set(0xffffff);
     earthMaterial.needsUpdate = true;
-  },
-  undefined,
-  () => console.info("Using fallback blue globe")
+  }
 );
 
-// Atmosphere
 earthGroup.add(new THREE.Mesh(
-  new THREE.SphereGeometry(R * 1.045, 48, 36),
+  new THREE.SphereGeometry(R * 1.04, 48, 36),
   new THREE.MeshBasicMaterial({
-    color: 0x0baaff,
+    color: 0x1baeff,
     transparent: true,
-    opacity: 0.075,
+    opacity: 0.055,
     side: THREE.BackSide,
     blending: THREE.AdditiveBlending,
     depthWrite: false
   })
 ));
 
-// Lighting
-scene.add(new THREE.AmbientLight(0x91c9ed, 1.45));
+scene.add(new THREE.AmbientLight(0x91c9ed, 1.35));
 
-const sun = new THREE.DirectionalLight(0xc7efff, 2.3);
-sun.position.set(-4, 4, 6);
-scene.add(sun);
+const sunlight = new THREE.DirectionalLight(0xc7efff, 2.1);
+sunlight.position.set(-4, 4, 6);
+scene.add(sunlight);
 
-const fill = new THREE.PointLight(0x00aaff, 26, 12);
-fill.position.set(2, -1, 3);
-scene.add(fill);
+const blueLight = new THREE.PointLight(0x00aaff, 22, 12);
+blueLight.position.set(2, -1, 3);
+scene.add(blueLight);
 
-// Stars
+// Background stars
 const starPositions = [];
-for (let i = 0; i < 1000; i++) {
-  const radius = 5 + Math.random() * 14;
-  const theta = Math.random() * Math.PI * 2;
-  const u = Math.random() * 2 - 1;
-  const q = Math.sqrt(1 - u * u);
-  starPositions.push(
-    radius * q * Math.cos(theta),
-    radius * q * Math.sin(theta),
-    radius * u
-  );
+for (let i = 0; i < 650; i++) {
+  const r = 5 + Math.random() * 13;
+  const z = Math.random() * 2 - 1;
+  const a = Math.random() * Math.PI * 2;
+  const q = Math.sqrt(1 - z * z);
+  starPositions.push(r*q*Math.cos(a), r*q*Math.sin(a), r*z);
 }
 
 const starGeometry = new THREE.BufferGeometry();
@@ -180,46 +170,48 @@ starGeometry.setAttribute(
   "position",
   new THREE.Float32BufferAttribute(starPositions, 3)
 );
-
 const stars = new THREE.Points(
   starGeometry,
   new THREE.PointsMaterial({
     color: 0x8bdfff,
-    size: 0.018,
+    size: 0.015,
     transparent: true,
-    opacity: 0.65
+    opacity: 0.58
   })
 );
 scene.add(stars);
 
-// Dense geographic mesh
+// Subtle latitude/longitude mesh
 earthGroup.add(new THREE.Mesh(
-  new THREE.SphereGeometry(R * 1.008, 42, 30),
+  new THREE.SphereGeometry(R * 1.006, 36, 26),
   new THREE.MeshBasicMaterial({
     color: 0x31bdff,
     wireframe: true,
     transparent: true,
-    opacity: 0.24,
+    opacity: 0.19,
     depthWrite: false
   })
 ));
 
-// Random uniform points on the sphere
-function randomSpherePoint(radius) {
-  const z = Math.random() * 2 - 1;
-  const angle = Math.random() * Math.PI * 2;
-  const horizontal = Math.sqrt(1 - z * z);
-
+function pointOnSphere(lat, lon, radius = R * 1.018) {
+  const phi = (90 - lat) * Math.PI / 180;
+  const theta = (lon + 180) * Math.PI / 180;
   return new THREE.Vector3(
-    radius * horizontal * Math.cos(angle),
-    radius * z,
-    radius * horizontal * Math.sin(angle)
+    -radius * Math.sin(phi) * Math.cos(theta),
+     radius * Math.cos(phi),
+     radius * Math.sin(phi) * Math.sin(theta)
   );
 }
 
-// Smooth curved path from one surface point to another.
-// Routes use different heights, so lines cross and overlap.
-function makeArc(start, end, lift, segments = 38) {
+function randomPoint(radius = R * 1.02) {
+  const z = Math.random() * 2 - 1;
+  const a = Math.random() * Math.PI * 2;
+  const q = Math.sqrt(1 - z*z);
+  return new THREE.Vector3(radius*q*Math.cos(a), radius*z, radius*q*Math.sin(a));
+}
+
+// Curved transmission cable between two globe points
+function arcPoints(start, end, lift, segments = 38) {
   const a = start.clone().normalize();
   const b = end.clone().normalize();
   const angle = a.angleTo(b);
@@ -232,20 +224,15 @@ function makeArc(start, end, lift, segments = 38) {
     if (angle < 0.001 || Math.abs(Math.sin(angle)) < 0.0001) {
       direction = a.clone().lerp(b, t).normalize();
     } else {
-      const denominator = Math.sin(angle);
+      const s = Math.sin(angle);
       direction = a.clone()
-        .multiplyScalar(Math.sin((1 - t) * angle) / denominator)
-        .add(
-          b.clone().multiplyScalar(Math.sin(t * angle) / denominator)
-        )
+        .multiplyScalar(Math.sin((1-t)*angle)/s)
+        .add(b.clone().multiplyScalar(Math.sin(t*angle)/s))
         .normalize();
     }
 
-    // Lift the middle of each line above the globe surface.
-    const arch = Math.pow(Math.sin(Math.PI * t), 0.85);
-    const radius = R * 1.018 + 0.035 + arch * lift;
-
-    points.push(direction.multiplyScalar(radius));
+    const h = Math.sin(Math.PI*t) * lift;
+    points.push(direction.multiplyScalar(R*1.018 + h));
   }
 
   return points;
@@ -254,363 +241,219 @@ function makeArc(start, end, lift, segments = 38) {
 const network = new THREE.Group();
 earthGroup.add(network);
 
-const tracks = [];
-const routeMaterials = [
+const cableMaterials = [
   new THREE.LineBasicMaterial({
-    color: 0x21caff,
-    transparent: true,
-    opacity: 0.46,
+    color: 0x21caff, transparent: true, opacity: 0.39,
     depthWrite: false
   }),
   new THREE.LineBasicMaterial({
-    color: 0x1688df,
-    transparent: true,
-    opacity: 0.34,
+    color: 0x1688df, transparent: true, opacity: 0.31,
     depthWrite: false
   }),
   new THREE.LineBasicMaterial({
-    color: 0x42e8ff,
-    transparent: true,
-    opacity: 0.30,
-    depthWrite: false
-  }),
-  new THREE.LineBasicMaterial({
-    color: 0x1260aa,
-    transparent: true,
-    opacity: 0.42,
+    color: 0x42e8ff, transparent: true, opacity: 0.27,
     depthWrite: false
   })
 ];
 
-// Add one route to the globe.
-function addRoute(start, end, index, options = {}) {
-  const distance = start.distanceTo(end);
-  const lift = options.lift ??
-    (0.08 + Math.random() * 0.58 +
-      Math.min(distance * 0.11, 0.35));
+const tracks = [];
+let cableIndex = 0;
 
-  const points = makeArc(start, end, lift, options.segments || 34);
+function addCable(start, end, options = {}) {
+  const lift = options.lift ?? (0.08 + Math.random()*0.45);
+  const points = arcPoints(start, end, lift, options.segments || 32);
+  const material = cableMaterials[cableIndex++ % cableMaterials.length];
 
-  const geometry = new THREE.BufferGeometry().setFromPoints(points);
-  const material = options.material ||
-    routeMaterials[index % routeMaterials.length];
-
-  const line = new THREE.Line(geometry, material);
+  const line = new THREE.Line(
+    new THREE.BufferGeometry().setFromPoints(points),
+    material
+  );
   network.add(line);
 
   if (options.pulse !== false) {
     tracks.push({
       points,
-      speed: 0.12 + Math.random() * 0.42,
       phase: Math.random(),
-      size: 0.018 + Math.random() * 0.025
+      speed: 0.10 + Math.random()*0.25
     });
   }
 }
 
-// Create a dense network over all latitudes and longitudes.
-// Connections on nearby grid points create a web across the globe.
-const gridNodes = [];
-const latitudeCount = 17;
-const longitudeCount = 36;
+// 14 latitude rows and 28 columns: moderate, even grid coverage
+const rows = 14;
+const cols = 28;
+const grid = [];
 
-for (let row = 0; row <= latitudeCount; row++) {
-  const lat = -85 + row * 170 / latitudeCount;
-  const rowNodes = [];
+for (let row = 0; row <= rows; row++) {
+  const lat = -82 + row * 164 / rows;
+  const points = [];
 
-  for (let col = 0; col < longitudeCount; col++) {
-    const lon = -180 + col * 360 / longitudeCount;
-    const point = new THREE.Vector3();
-
-    const phi = (90 - lat) * Math.PI / 180;
-    const theta = (lon + 180) * Math.PI / 180;
-
-    point.set(
-      -R * 1.023 * Math.sin(phi) * Math.cos(theta),
-       R * 1.023 * Math.cos(phi),
-       R * 1.023 * Math.sin(phi) * Math.sin(theta)
-    );
-
-    rowNodes.push(point);
+  for (let col = 0; col < cols; col++) {
+    const lon = -180 + col * 360 / cols;
+    points.push(pointOnSphere(lat, lon));
   }
 
-  gridNodes.push(rowNodes);
+  grid.push(points);
 }
 
-let routeIndex = 0;
+// Horizontal and vertical grid cables
+for (let row = 0; row <= rows; row++) {
+  for (let col = 0; col < cols; col++) {
+    const next = (col + 1) % cols;
 
-// Horizontal connections along latitude bands
-for (let row = 0; row < gridNodes.length; row++) {
-  const rowNodes = gridNodes[row];
-
-  for (let col = 0; col < longitudeCount; col++) {
-    const next = (col + 1) % longitudeCount;
-
-    addRoute(
-      rowNodes[col],
-      rowNodes[next],
-      routeIndex++,
-      {
-        lift: 0.025 + Math.random() * 0.11,
-        segments: 10
-      }
-    );
-
-    // Additional longitude-spanning links
-    if (col % 2 === 0 && rowNodes.length > 0) {
-      const farther = (col + 2) % longitudeCount;
-
-      addRoute(
-        rowNodes[col],
-        rowNodes[farther],
-        routeIndex++,
-        {
-          lift: 0.06 + Math.random() * 0.17,
-          segments: 12
-        }
-      );
-    }
-  }
-}
-
-// Vertical connections along longitude bands
-for (let row = 0; row < latitudeCount; row++) {
-  for (let col = 0; col < longitudeCount; col++) {
-    const a = gridNodes[row][col];
-    const b = gridNodes[row + 1][col];
-
-    addRoute(a, b, routeIndex++, {
-      lift: 0.035 + Math.random() * 0.12,
+    addCable(grid[row][col], grid[row][next], {
+      lift: 0.025 + Math.random()*0.06,
       segments: 10
     });
 
-    // Diagonal cross-links make the grid look interwoven.
-    const nextCol = (col + 1) % longitudeCount;
+    if (row < rows) {
+      addCable(grid[row][col], grid[row+1][col], {
+        lift: 0.025 + Math.random()*0.07,
+        segments: 10
+      });
 
-    if ((row + col) % 2 === 0) {
-      addRoute(
-        a,
-        gridNodes[row + 1][nextCol],
-        routeIndex++,
-        {
-          lift: 0.08 + Math.random() * 0.25,
+      // Diagonal links on alternate grid cells
+      if ((row + col) % 3 === 0) {
+        addCable(grid[row][col], grid[row+1][next], {
+          lift: 0.07 + Math.random()*0.13,
           segments: 15
-        }
-      );
-    } else if (col % 3 === 0) {
-      const prevCol = (col - 1 + longitudeCount) % longitudeCount;
-
-      addRoute(
-        a,
-        gridNodes[row + 1][prevCol],
-        routeIndex++,
-        {
-          lift: 0.08 + Math.random() * 0.23,
-          segments: 15
-        }
-      );
+        });
+      }
     }
   }
 }
 
-// Major energy hubs distributed around the globe
+// Realistic-looking regional hubs, without oversized glowing balls
 const hubSpecs = [
-  [40, -74], [51.5, -0.1], [24.9, 67], [23.8, 90.4],
-  [35.7, 139.7], [19, 72.8], [-33.9, 151.2],
-  [1.3, 103.8], [30, 31], [-23.5, -46.6],
-  [37.6, 127], [55.8, 37.6], [48.8, 2.3],
-  [25.2, 55.3], [-1.3, 36.8], [43.7, -79.4],
-  [34, -118.2], [39.9, 116.4], [-34.6, -58.4],
-  [52.5, 13.4], [41.9, 12.5], [28.6, 77.2],
-  [13.1, 80.3], [31.2, 121.5], [14.6, 121],
-  [-26.2, 28], [19.4, -99.1], [59.9, 30.3],
-  [60.2, 24.9], [-36.8, 174.8], [35.7, 51.4],
-  [33.3, 44.4], [6.5, 3.4], [-4.3, 15.3],
-  [45.5, -73.6], [49.3, -123.1], [10.8, 106.7]
+  [40,-74],[51.5,-0.1],[24.9,67],[23.8,90.4],[35.7,139.7],
+  [19,72.8],[-33.9,151.2],[1.3,103.8],[30,31],[-23.5,-46.6],
+  [37.6,127],[55.8,37.6],[48.8,2.3],[25.2,55.3],[-1.3,36.8],
+  [43.7,-79.4],[34,-118.2],[39.9,116.4],[-34.6,-58.4],[52.5,13.4],
+  [41.9,12.5],[28.6,77.2],[13.1,80.3],[31.2,121.5],
+  [14.6,121],[-26.2,28],[19.4,-99.1],[60.2,24.9]
 ];
 
-function latLon(lat, lon, radius = R * 1.03) {
-  const phi = (90 - lat) * Math.PI / 180;
-  const theta = (lon + 180) * Math.PI / 180;
+const hubs = hubSpecs.map(([lat,lon]) => pointOnSphere(lat,lon,R*1.025));
 
-  return new THREE.Vector3(
-    -radius * Math.sin(phi) * Math.cos(theta),
-     radius * Math.cos(phi),
-     radius * Math.sin(phi) * Math.sin(theta)
-  );
-}
+const nodeGeometry = new THREE.SphereGeometry(0.022, 7, 7);
+const nodeMaterial = new THREE.MeshBasicMaterial({ color: 0x8bf6ff });
 
-const hubs = hubSpecs.map(([lat, lon]) => latLon(lat, lon));
-const hubGeometry = new THREE.SphereGeometry(0.035, 8, 8);
-const hubMaterial = new THREE.MeshBasicMaterial({ color: 0x9bfff9 });
 const hubMeshes = [];
 
-hubs.forEach((point, i) => {
-  const node = new THREE.Mesh(hubGeometry, hubMaterial);
-  node.position.copy(point);
+hubs.forEach((hub, i) => {
+  const node = new THREE.Mesh(nodeGeometry, nodeMaterial);
+  node.position.copy(hub);
   network.add(node);
   hubMeshes.push(node);
 
-  // Extra local links from each hub to nearby grid nodes.
-  const nearby = [];
+  // Connect each hub to nearby grid points
+  const candidates = grid.flat().map(p => ({
+    point: p,
+    distance: p.distanceTo(hub)
+  })).sort((a,b) => a.distance-b.distance);
 
-  gridNodes.flat().forEach(gridPoint => {
-    const distance = point.distanceTo(gridPoint);
-    if (distance < 0.72) nearby.push({ point: gridPoint, distance });
-  });
-
-  nearby.sort((a, b) => a.distance - b.distance);
-
-  nearby.slice(0, 5).forEach((item, j) => {
-    addRoute(point, item.point, routeIndex++, {
-      lift: 0.13 + Math.random() * 0.32,
-      segments: 20
+  candidates.slice(0,3).forEach(item => {
+    addCable(hub,item.point,{
+      lift:0.10+Math.random()*0.25,
+      segments:20
     });
   });
 
-  // Connect hubs to several other distant hubs.
-  const otherHubs = hubs
-    .map((other, index) => ({
-      point: other,
-      index,
-      distance: point.distanceTo(other)
-    }))
-    .filter(item => item.index !== i)
-    .sort((a, b) => a.distance - b.distance);
+  // Connect each hub to two nearby hubs for cross-links
+  const others = hubs.map((p,j)=>({
+    point:p,index:j,distance:p.distanceTo(hub)
+  })).filter(x=>x.index!==i).sort((a,b)=>a.distance-b.distance);
 
-  otherHubs.slice(0, 7).forEach((item, j) => {
-    if (item.index > i) {
-      addRoute(point, item.point, routeIndex++, {
-        lift: 0.18 + Math.random() * 0.7,
-        segments: 30
+  others.slice(0,2).forEach(item=>{
+    if(item.index>i){
+      addCable(hub,item.point,{
+        lift:0.18+Math.random()*0.45,
+        segments:28
       });
     }
   });
 });
 
-// Additional long routes: these deliberately cross the existing grid.
-const longRouteCount = 125;
-
-for (let i = 0; i < longRouteCount; i++) {
-  const start = randomSpherePoint(R * 1.022);
-  const end = randomSpherePoint(R * 1.022);
-
-  addRoute(start, end, routeIndex++, {
-    lift: 0.25 + Math.random() * 1.0,
-    segments: 38
+// Additional global cables, limited to avoid visual clutter
+for(let i=0;i<48;i++){
+  addCable(randomPoint(),randomPoint(),{
+    lift:0.22+Math.random()*0.65,
+    segments:34
   });
 }
 
-// Another layer of medium-length links to close visible gaps.
-const mediumRouteCount = 110;
-
-for (let i = 0; i < mediumRouteCount; i++) {
-  const start = randomSpherePoint(R * 1.024);
-  const end = randomSpherePoint(R * 1.024);
-
-  addRoute(start, end, routeIndex++, {
-    lift: 0.10 + Math.random() * 0.65,
-    segments: 30
-  });
-}
-
-// Bright pulses travelling across the network
-const pulseMaterial = new THREE.MeshBasicMaterial({
-  color: 0xa5fff5
-});
-
-const pulseGeometry = new THREE.SphereGeometry(0.034, 8, 8);
+// Small, restrained energy pulses
+const pulseGeometry = new THREE.SphereGeometry(0.016, 6, 6);
+const pulseMaterial = new THREE.MeshBasicMaterial({ color: 0x9bfff5 });
 const pulses = [];
 
-tracks.forEach(track => {
-  const pulse = new THREE.Mesh(pulseGeometry, pulseMaterial);
-  pulse.scale.setScalar(0.55 + Math.random() * 0.8);
-  network.add(pulse);
+// Only a portion of the cables carry visible pulses
+tracks.forEach((track,index)=>{
+  if(index % 3 !== 0) return;
 
+  const mesh = new THREE.Mesh(pulseGeometry,pulseMaterial);
+  network.add(mesh);
   pulses.push({
-    mesh: pulse,
-    points: track.points,
-    phase: track.phase,
-    speed: track.speed
+    mesh,
+    points:track.points,
+    phase:track.phase,
+    speed:track.speed
   });
 });
 
-// Additional tiny cyan points on a subset of routes
-const tinyGeometry = new THREE.SphereGeometry(0.015, 6, 6);
-const tinyMaterial = new THREE.MeshBasicMaterial({ color: 0x32cfff });
-
-for (let i = 0; i < 65; i++) {
-  const track = tracks[Math.floor(Math.random() * tracks.length)];
-  const mesh = new THREE.Mesh(tinyGeometry, tinyMaterial);
-  network.add(mesh);
-
-  pulses.push({
-    mesh,
-    points: track.points,
-    phase: Math.random(),
-    speed: 0.25 + Math.random() * 0.65
-  });
-}
-
-// Animate
 const clock = new THREE.Clock();
 
-function animate() {
+function animate(){
   requestAnimationFrame(animate);
-
-  const delta = Math.min(clock.getDelta(), 0.04);
+  const delta = Math.min(clock.getDelta(),0.04);
   const elapsed = clock.elapsedTime;
 
-  earthGroup.rotation.y += delta * 0.045;
-  earthGroup.rotation.x = 0.035 + Math.sin(elapsed * 0.15) * 0.018;
-  stars.rotation.y += delta * 0.002;
+  earthGroup.rotation.y += delta*0.043;
+  earthGroup.rotation.x = 0.025 + Math.sin(elapsed*0.12)*0.015;
+  stars.rotation.y += delta*0.002;
 
-  pulses.forEach(item => {
-    item.phase = (item.phase + delta * item.speed) % 1;
-
-    const points = item.points;
-    const position = item.phase * (points.length - 1);
-    const index = Math.floor(position);
-    const next = Math.min(index + 1, points.length - 1);
-    const fraction = position - index;
+  pulses.forEach(item=>{
+    item.phase=(item.phase+delta*item.speed)%1;
+    const position=item.phase*(item.points.length-1);
+    const index=Math.floor(position);
+    const next=Math.min(index+1,item.points.length-1);
+    const fraction=position-index;
 
     item.mesh.position.copy(
-      points[index].clone().lerp(points[next], fraction)
+      item.points[index].clone().lerp(item.points[next],fraction)
     );
   });
 
-  hubMeshes.forEach((node, i) => {
-    const s = 1 + Math.sin(elapsed * 2.0 + i) * 0.18;
-    node.scale.setScalar(s);
+  // Nodes remain small; no large, distracting glowing spheres
+  hubMeshes.forEach((node,i)=>{
+    node.scale.setScalar(1+Math.sin(elapsed*1.4+i)*0.09);
   });
 
-  renderer.render(scene, camera);
+  renderer.render(scene,camera);
 }
 
-// Responsive layout
-function resize() {
-  const width = window.innerWidth;
-  const height = window.innerHeight;
+function resize(){
+  const width=innerWidth;
+  const height=innerHeight;
+  camera.aspect=width/height;
 
-  camera.aspect = width / height;
-
-  if (width < 620) {
-    camera.position.z = 9.3;
+  if(width<620){
+    camera.position.z=9.2;
     earthGroup.scale.setScalar(0.82);
-  } else if (width < 900) {
-    camera.position.z = 8.8;
-    earthGroup.scale.setScalar(0.92);
-  } else {
-    camera.position.z = 8.8;
+  }else if(width<900){
+    camera.position.z=8.8;
+    earthGroup.scale.setScalar(0.91);
+  }else{
+    camera.position.z=8.8;
     earthGroup.scale.setScalar(1);
   }
 
   camera.updateProjectionMatrix();
-  renderer.setSize(width, height);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+  renderer.setSize(width,height);
+  renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.5));
 }
 
-window.addEventListener("resize", resize);
+window.addEventListener("resize",resize);
 resize();
 animate();
 </script>
