@@ -1,12 +1,14 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#0b1220">
-  <meta name="description" content="Create your Lumora account and securely save your energy readings.">
+  <meta name="theme-color" content="#08111f">
+  <meta name="description" content="Sign in or create your Lumora energy analytics account.">
   <title>Account — Lumora</title>
 
+  <link rel="icon" type="image/png" href="./lumora-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -23,9 +25,7 @@
       --white: #f5f8ff;
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
@@ -42,10 +42,7 @@
       color: var(--white);
     }
 
-    .wrap {
-      width: 100%;
-      max-width: 550px;
-    }
+    .wrap { width: 100%; max-width: 550px; }
 
     .brand {
       display: flex;
@@ -53,28 +50,25 @@
       justify-content: center;
       gap: 14px;
       margin-bottom: 8px;
+      text-decoration: none;
       font-family: "Space Grotesk", sans-serif;
-      font-size: 32px;
-      font-weight: 700;
-      letter-spacing: -1px;
     }
 
-    .mark {
-      display: grid;
-      place-items: center;
-      width: 56px;
-      height: 56px;
-      border-radius: 17px;
-      background: linear-gradient(135deg, #35d7e8, #8185ff);
-      color: #061525;
-      font-size: 30px;
+    .brand img {
+      width: 58px;
+      height: 58px;
+      object-fit: contain;
+      border-radius: 16px;
     }
 
     .brand-name {
-      background: linear-gradient(90deg, #fff 55%, #43d8e7);
-      color: transparent;
-      background-clip: text;
+      font-size: 34px;
+      font-weight: 700;
+      letter-spacing: -1.2px;
+      color: var(--white);
     }
+
+    .brand-dot { color: var(--cyan); }
 
     .tagline {
       text-align: center;
@@ -83,7 +77,7 @@
     }
 
     .card {
-      background: rgba(16, 29, 48, 0.96);
+      background: rgba(16, 29, 48, .96);
       border: 1px solid var(--line);
       border-radius: 27px;
       padding: 30px 34px 32px;
@@ -118,7 +112,7 @@
       font-family: "Space Grotesk", sans-serif;
       font-size: 30px;
       line-height: 1.2;
-      letter-spacing: -0.8px;
+      letter-spacing: -.8px;
       margin: 0 0 10px;
     }
 
@@ -151,9 +145,7 @@
       box-shadow: 0 0 0 3px #39d9e81c;
     }
 
-    .field {
-      margin-bottom: 19px;
-    }
+    .field { margin-bottom: 19px; }
 
     .names {
       display: grid;
@@ -168,8 +160,7 @@
       line-height: 1.6;
     }
 
-    button,
-    .primary {
+    button, .primary {
       width: 100%;
       display: flex;
       align-items: center;
@@ -188,10 +179,7 @@
       margin-top: 8px;
     }
 
-    button:disabled {
-      opacity: 0.65;
-      cursor: wait;
-    }
+    button:disabled { opacity: .65; cursor: wait; }
 
     .secondary {
       background: #20384f;
@@ -225,23 +213,16 @@
       margin: 27px 0 0;
     }
 
-    .back {
-      text-align: center;
-      margin: 25px 0 0;
-    }
+    .back { text-align: center; margin: 25px 0 0; }
 
     .back a {
       color: #9fbbe0;
       text-decoration: none;
     }
 
-    .back a:hover {
-      color: var(--cyan);
-    }
+    .back a:hover { color: var(--cyan); }
 
-    .success {
-      text-align: center;
-    }
+    .success { text-align: center; }
 
     .success-icon {
       width: 72px;
@@ -274,32 +255,15 @@
       padding-left: 22px;
     }
 
-    [hidden] {
-      display: none !important;
-    }
+    [hidden] { display: none !important; }
 
     @media (max-width: 520px) {
-      body {
-        padding: 24px 13px;
-      }
-
-      .card {
-        padding: 24px 20px;
-        border-radius: 22px;
-      }
-
-      .brand {
-        font-size: 29px;
-      }
-
-      .names {
-        grid-template-columns: 1fr;
-        gap: 0;
-      }
-
-      h1 {
-        font-size: 27px;
-      }
+      body { padding: 24px 13px; }
+      .card { padding: 24px 20px; border-radius: 22px; }
+      .brand-name { font-size: 30px; }
+      .brand img { width: 50px; height: 50px; }
+      .names { grid-template-columns: 1fr; gap: 0; }
+      h1 { font-size: 27px; }
     }
   </style>
 </head>
@@ -307,10 +271,10 @@
 <body>
   <main class="wrap">
 
-    <div class="brand">
-      <div class="mark" aria-hidden="true">L</div>
-      <span class="brand-name">Lumora</span>
-    </div>
+    <a href="./index.html" class="brand" aria-label="Lumora home">
+      <img src="./lumora-icon.png" alt="" width="58" height="58">
+      <span class="brand-name">lumora<span class="brand-dot">.</span></span>
+    </a>
 
     <p class="tagline">Smarter Energy, Brighter Future.</p>
 
@@ -323,7 +287,6 @@
 
       <div id="formView">
         <h1 id="formTitle">Create your account</h1>
-
         <p class="intro" id="formIntro">
           Create a Lumora account to securely save your energy readings.
         </p>
@@ -331,91 +294,53 @@
         <div class="notice" id="notice" role="status" aria-live="polite"></div>
 
         <form id="authForm">
-
           <div class="names" id="nameFields">
             <div class="field">
               <label for="firstName">First name</label>
-              <input
-                id="firstName"
-                name="firstName"
-                autocomplete="given-name"
-                maxlength="60"
-                placeholder="First name"
-                required
-              >
+              <input id="firstName" name="firstName" autocomplete="given-name"
+                     maxlength="60" placeholder="First name" required>
             </div>
 
             <div class="field">
               <label for="lastName">Last name</label>
-              <input
-                id="lastName"
-                name="lastName"
-                autocomplete="family-name"
-                maxlength="60"
-                placeholder="Last name"
-                required
-              >
+              <input id="lastName" name="lastName" autocomplete="family-name"
+                     maxlength="60" placeholder="Last name" required>
             </div>
           </div>
 
           <div class="field">
             <label for="email">Email address</label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              autocomplete="email"
-              maxlength="254"
-              placeholder="you@example.com"
-              required
-            >
+            <input id="email" name="email" type="email" autocomplete="email"
+                   maxlength="254" placeholder="you@example.com" required>
           </div>
 
           <div class="field">
             <label for="password">Password</label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              autocomplete="new-password"
-              minlength="8"
-              placeholder="Create a password"
-              required
-            >
-            <div class="hint" id="passwordHint">
-              Use at least 8 characters.
-            </div>
+            <input id="password" name="password" type="password"
+                   autocomplete="new-password" minlength="8"
+                   placeholder="Create a password" required>
+            <div class="hint" id="passwordHint">Use at least 8 characters.</div>
           </div>
 
-          <div
-            id="forgotWrap"
-            style="text-align:right;margin:-5px 0 18px;font-size:13px"
-            hidden
-          >
-            <a
-              href="#"
-              id="forgotLink"
-              style="color:#39d9e8;text-decoration:none"
-            >Forgot password?</a>
+          <div id="forgotWrap"
+               style="text-align:right;margin:-5px 0 18px;font-size:13px"
+               hidden>
+            <a href="#" id="forgotLink"
+               style="color:#39d9e8;text-decoration:none">Forgot password?</a>
           </div>
 
-          <button id="submitButton" type="submit">
-            Create account
-          </button>
-
+          <button id="submitButton" type="submit">Create account</button>
         </form>
       </div>
 
       <div id="successView" class="success" hidden>
-
         <div class="success-icon" aria-hidden="true">✉</div>
-
         <h1>Check your email to verify</h1>
 
         <p class="intro">
-          We’ve sent a verification link to the email address below.
-          Open that message and click the verification link to activate
-          your Lumora account.
+          We’ve requested a verification email for the address below.
+          Open the message and click its verification link to activate your
+          Lumora account.
         </p>
 
         <div class="email-highlight" id="sentEmail"></div>
@@ -423,25 +348,22 @@
         <ol class="steps">
           <li>Open your inbox and find the verification email.</li>
           <li>Click the verification link in the email.</li>
-          <li>If it isn’t there, check your Spam or Junk folder.</li>
+          <li>If it isn't there, check your Spam or Junk folder.</li>
         </ol>
 
         <p class="intro" style="margin-top:18px">
-          After verification, return to Lumora and log in with your email
-          and password.
+          After verification, return to Lumora and log in.
         </p>
 
-        <a class="primary" href="./auth.html?mode=login">
-          Back to login
-        </a>
+        <a class="primary" href="./auth.html?mode=login">Back to login</a>
 
         <button type="button" id="resendButton" class="secondary">
           Resend verification email
         </button>
 
         <div class="hint" id="resendHint" role="status" aria-live="polite"></div>
-
       </div>
+
     </section>
 
     <p class="privacy" id="privacy">
