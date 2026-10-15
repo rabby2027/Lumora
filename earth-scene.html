@@ -4,52 +4,109 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Lumora Interactive Earth</title>
+<title>Lumora | Interactive Earth</title>
+
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 html,body,#scene{width:100%;height:100%;overflow:hidden}
 body{background:#071321;color:#eafaff;font-family:Arial,Helvetica,sans-serif}
 #scene{position:absolute;inset:0;z-index:0}
 canvas{display:block;width:100%;height:100%;touch-action:none;cursor:grab}
-canvas:active{cursor:grabbing}
+
 .heading,.metrics,.legend,.footer,.hint,.frame{position:absolute;pointer-events:none}
 .heading{top:25px;left:27px;z-index:2}
 .eyebrow{font-size:11px;font-weight:bold;letter-spacing:3px;color:#67eaff;margin-bottom:10px}
 h1{font-size:clamp(23px,3.5vw,36px);line-height:1.13;letter-spacing:-1px}
 h1 span{color:#60e8ff}
 .subtitle{margin-top:10px;font-size:10px;letter-spacing:1.6px;color:#8db9d0}
-.metrics{top:50%;right:22px;transform:translateY(-38%);z-index:2;width:154px;display:grid;gap:10px}
+
+.metrics{
+  top:50%;right:22px;transform:translateY(-40%);
+  z-index:2;width:154px;display:grid;gap:10px
+}
 .metric{padding:12px;border:1px solid #35cafa55;border-radius:13px;background:#091b2be8}
 .label{font-size:9px;color:#94bfd4;letter-spacing:1px}
 .value{margin-top:5px;color:#79efff;font-size:25px;font-weight:bold}
 .unit{font-size:12px}
 .note{margin-top:4px;color:#8daabd;font-size:9px}
-.legend{left:27px;bottom:105px;z-index:2;display:grid;gap:9px;color:#83a9bc;font-size:9px;letter-spacing:.4px}
-.legend span{display:flex;align-items:center;gap:7px}
-.legend i{display:inline-block;width:16px;height:2px;background:#29cfff;box-shadow:0 0 5px #29cfff}
+
+/* Legend is separated from the bottom status bar */
+.legend{
+  position:absolute;
+  left:27px;
+  bottom:75px;
+  z-index:2;
+  display:grid;
+  gap:10px;
+  color:#83a9bc;
+  font-size:9px;
+  letter-spacing:.4px;
+}
+.legend span{display:flex;align-items:center;gap:8px}
+.legend i{display:inline-block;width:17px;height:2px;background:#29cfff;box-shadow:0 0 5px #29cfff}
 .legend .mint{background:#8bfff0;box-shadow:0 0 5px #8bfff0}
-.footer{left:27px;bottom:20px;z-index:2;display:grid;gap:5px;font-size:9px;letter-spacing:.5px;color:#83a9bc}
-.live{display:flex;align-items:center;gap:7px}
-.dot{width:6px;height:6px;border-radius:50%;background:#6effd7;box-shadow:0 0 8px #6effd7}
-.hint{right:28px;bottom:22px;z-index:2;font-size:9px;letter-spacing:1px;color:#83a9bc}
+
+/* One clean footer row */
+.footer{
+  left:27px;
+  right:27px;
+  bottom:20px;
+  z-index:3;
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  gap:10px;
+  min-height:17px;
+  padding:0;
+  color:#91b3c6;
+  font-size:9px;
+  letter-spacing:.55px;
+  white-space:nowrap;
+}
+.live{display:inline-flex;align-items:center;gap:7px}
+.dot{width:7px;height:7px;flex-shrink:0;border-radius:50%;background:#6effd7;box-shadow:0 0 8px #6effd7}
+.footer-divider{color:#42677d}
+
+.hint{
+  right:27px;
+  bottom:20px;
+  z-index:3;
+  font-size:9px;
+  letter-spacing:.7px;
+  color:#91b3c6;
+  white-space:nowrap;
+}
 .frame{inset:13px;z-index:4;border:1px solid #4dc8ef30;border-radius:23px}
+
 @media(max-width:620px){
- .heading{top:22px;left:20px}
- .eyebrow{font-size:9px;letter-spacing:2px}
- h1{font-size:25px}
- .subtitle{font-size:9px}
- .metrics{top:auto;right:17px;bottom:120px;transform:none;width:120px;gap:7px}
- .metric{padding:9px;border-radius:10px}
- .label{font-size:8px}
- .value{font-size:20px}
- .note{font-size:8px}
- .legend{left:20px;bottom:112px;font-size:8px;gap:7px}
- .footer{left:20px;bottom:18px;font-size:8px;gap:4px}
- .hint{right:18px;bottom:19px;font-size:8px}
- .frame{inset:8px;border-radius:16px}
+  .heading{top:22px;left:20px}
+  .eyebrow{font-size:9px;letter-spacing:2px}
+  h1{font-size:25px}
+  .subtitle{font-size:9px}
+  .metrics{top:auto;right:15px;bottom:125px;transform:none;width:116px;gap:7px}
+  .metric{padding:9px;border-radius:10px}
+  .label{font-size:8px}
+  .value{font-size:20px}
+  .note{font-size:8px}
+  .legend{left:20px;bottom:76px;font-size:8px;gap:8px}
+  .footer{left:20px;right:20px;bottom:19px;font-size:8px;gap:7px}
+  .hint{display:none}
+  .frame{inset:8px;border-radius:16px}
+}
+
+@media(max-width:380px){
+  .heading{top:18px;left:17px}
+  .eyebrow{font-size:8px}
+  h1{font-size:22px}
+  .subtitle{font-size:8px}
+  .metrics{right:12px;width:105px;bottom:120px}
+  .value{font-size:18px}
+  .legend{left:17px;font-size:7px}
+  .footer{left:17px;font-size:7px}
 }
 </style>
 </head>
+
 <body>
 <div id="scene"></div>
 
@@ -60,9 +117,21 @@ h1 span{color:#60e8ff}
 </div>
 
 <div class="metrics">
-  <div class="metric"><div class="label">GRID VOLTAGE</div><div class="value">230 <span class="unit">V</span></div><div class="note">Illustrative demo</div></div>
-  <div class="metric"><div class="label">ENERGY FLOW</div><div class="value">3.8 <span class="unit">kW</span></div><div class="note">Illustrative demo</div></div>
-  <div class="metric"><div class="label">CONSUMPTION</div><div class="value">248.6 <span class="unit">kWh</span></div><div class="note">Sample data only</div></div>
+  <div class="metric">
+    <div class="label">GRID VOLTAGE</div>
+    <div class="value">230 <span class="unit">V</span></div>
+    <div class="note">Illustrative demo</div>
+  </div>
+  <div class="metric">
+    <div class="label">ENERGY FLOW</div>
+    <div class="value">3.8 <span class="unit">kW</span></div>
+    <div class="note">Illustrative demo</div>
+  </div>
+  <div class="metric">
+    <div class="label">CONSUMPTION</div>
+    <div class="value">248.6 <span class="unit">kWh</span></div>
+    <div class="note">Sample data only</div>
+  </div>
 </div>
 
 <div class="legend">
@@ -72,313 +141,443 @@ h1 span{color:#60e8ff}
 
 <div class="footer">
   <span class="live"><i class="dot"></i> ROTATING PLANET</span>
+  <span class="footer-divider">•</span>
   <span>ENERGY NETWORK SIMULATION</span>
 </div>
+
 <div class="hint">DRAG TO ROTATE EARTH</div>
 <div class="frame"></div>
 
 <script type="module">
 import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js";
 
-const container=document.getElementById("scene");
-const scene=new THREE.Scene();
-scene.background=new THREE.Color("#071321");
+const container = document.getElementById("scene");
+const scene = new THREE.Scene();
+scene.background = new THREE.Color("#071321");
 
-const camera=new THREE.PerspectiveCamera(42,1,0.1,100);
-camera.position.z=8.5;
+const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100);
+camera.position.z = 8.5;
 
-const renderer=new THREE.WebGLRenderer({antialias:true,alpha:false});
-renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.5));
-renderer.outputColorSpace=THREE.SRGBColorSpace;
+const renderer = new THREE.WebGLRenderer({antialias:true, alpha:false});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+renderer.outputColorSpace = THREE.SRGBColorSpace;
 container.appendChild(renderer.domElement);
 
-const earthGroup=new THREE.Group();
+const earthGroup = new THREE.Group();
 scene.add(earthGroup);
-const R=2.15;
+const R = 2.15;
 
-scene.add(new THREE.AmbientLight(0x9acdeb,1.5));
-const sun=new THREE.DirectionalLight(0xd5f4ff,2.3);
-sun.position.set(-4,4,6);
+scene.add(new THREE.AmbientLight(0x9acdeb, 1.5));
+
+const sun = new THREE.DirectionalLight(0xd5f4ff, 2.3);
+sun.position.set(-4, 4, 6);
 scene.add(sun);
-const glow=new THREE.PointLight(0x008fff,25,12);
-glow.position.set(2,-1,3);
+
+const glow = new THREE.PointLight(0x008fff, 25, 12);
+glow.position.set(2, -1, 3);
 scene.add(glow);
 
-// Earth sphere and texture
-const earthMat=new THREE.MeshPhongMaterial({
+/* Earth */
+const earthMat = new THREE.MeshPhongMaterial({
   color:0x236b9b,
   shininess:20,
   specular:new THREE.Color(0x163e62)
 });
-const earth=new THREE.Mesh(new THREE.SphereGeometry(R,64,48),earthMat);
+
+const earth = new THREE.Mesh(
+  new THREE.SphereGeometry(R, 64, 48),
+  earthMat
+);
 earthGroup.add(earth);
 
 new THREE.TextureLoader().load(
   "https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg",
-  texture=>{
-    texture.colorSpace=THREE.SRGBColorSpace;
-    earthMat.map=texture;
+  texture => {
+    texture.colorSpace = THREE.SRGBColorSpace;
+    earthMat.map = texture;
     earthMat.color.set(0xffffff);
-    earthMat.needsUpdate=true;
+    earthMat.needsUpdate = true;
   },
   undefined,
-  error=>console.warn("Earth texture unavailable; using blue globe.",error)
+  error => console.warn("Earth texture unavailable; showing blue globe.", error)
 );
 
-// Atmosphere
+/* Atmospheric glow */
 earthGroup.add(new THREE.Mesh(
-  new THREE.SphereGeometry(R*1.04,48,36),
+  new THREE.SphereGeometry(R * 1.04, 48, 36),
   new THREE.MeshBasicMaterial({
-    color:0x159eff,transparent:true,opacity:0.07,
-    side:THREE.BackSide,blending:THREE.AdditiveBlending,depthWrite:false
+    color:0x159eff,
+    transparent:true,
+    opacity:0.07,
+    side:THREE.BackSide,
+    blending:THREE.AdditiveBlending,
+    depthWrite:false
   })
 ));
 
-// Fine globe grid
+/* Globe grid */
 earthGroup.add(new THREE.Mesh(
-  new THREE.SphereGeometry(R*1.008,36,26),
+  new THREE.SphereGeometry(R * 1.008, 36, 26),
   new THREE.MeshBasicMaterial({
-    color:0x31bdff,wireframe:true,transparent:true,
-    opacity:0.19,depthWrite:false
+    color:0x31bdff,
+    wireframe:true,
+    transparent:true,
+    opacity:0.19,
+    depthWrite:false
   })
 ));
 
-// Stars
-const starPositions=[];
-for(let i=0;i<500;i++){
-  const r=5+Math.random()*12;
-  const z=Math.random()*2-1;
-  const a=Math.random()*Math.PI*2;
-  const q=Math.sqrt(1-z*z);
-  starPositions.push(r*q*Math.cos(a),r*q*Math.sin(a),r*z);
-}
-const starGeo=new THREE.BufferGeometry();
-starGeo.setAttribute("position",new THREE.Float32BufferAttribute(starPositions,3));
-scene.add(new THREE.Points(starGeo,new THREE.PointsMaterial({
-  color:0x8bdfff,size:0.014,transparent:true,opacity:0.55
-})));
+/* Stars */
+const starPositions = [];
 
-function pointOnSphere(lat,lon,radius=R*1.018){
-  const phi=(90-lat)*Math.PI/180;
-  const theta=(lon+180)*Math.PI/180;
-  return new THREE.Vector3(
-    -radius*Math.sin(phi)*Math.cos(theta),
-     radius*Math.cos(phi),
-     radius*Math.sin(phi)*Math.sin(theta)
+for (let i = 0; i < 500; i++) {
+  const r = 5 + Math.random() * 12;
+  const z = Math.random() * 2 - 1;
+  const a = Math.random() * Math.PI * 2;
+  const q = Math.sqrt(1 - z * z);
+
+  starPositions.push(
+    r * q * Math.cos(a),
+    r * q * Math.sin(a),
+    r * z
   );
 }
 
-function randomPoint(radius=R*1.02){
-  const z=Math.random()*2-1;
-  const a=Math.random()*Math.PI*2;
-  const q=Math.sqrt(1-z*z);
-  return new THREE.Vector3(radius*q*Math.cos(a),radius*z,radius*q*Math.sin(a));
+const starGeo = new THREE.BufferGeometry();
+starGeo.setAttribute(
+  "position",
+  new THREE.Float32BufferAttribute(starPositions, 3)
+);
+
+const stars = new THREE.Points(
+  starGeo,
+  new THREE.PointsMaterial({
+    color:0x8bdfff,
+    size:0.014,
+    transparent:true,
+    opacity:0.55
+  })
+);
+scene.add(stars);
+
+/* Coordinates */
+function pointOnSphere(lat, lon, radius = R * 1.018) {
+  const phi = (90 - lat) * Math.PI / 180;
+  const theta = (lon + 180) * Math.PI / 180;
+
+  return new THREE.Vector3(
+    -radius * Math.sin(phi) * Math.cos(theta),
+     radius * Math.cos(phi),
+     radius * Math.sin(phi) * Math.sin(theta)
+  );
 }
 
-function arcPoints(start,end,lift,segments=28){
-  const a=start.clone().normalize();
-  const b=end.clone().normalize();
-  const angle=a.angleTo(b);
-  const points=[];
-  for(let i=0;i<=segments;i++){
-    const t=i/segments;
-    let d;
-    if(angle<0.001||Math.abs(Math.sin(angle))<0.0001){
-      d=a.clone().lerp(b,t).normalize();
-    }else{
-      const s=Math.sin(angle);
-      d=a.clone().multiplyScalar(Math.sin((1-t)*angle)/s)
-       .add(b.clone().multiplyScalar(Math.sin(t*angle)/s)).normalize();
+function randomPoint(radius = R * 1.02) {
+  const z = Math.random() * 2 - 1;
+  const a = Math.random() * Math.PI * 2;
+  const q = Math.sqrt(1 - z * z);
+
+  return new THREE.Vector3(
+    radius * q * Math.cos(a),
+    radius * z,
+    radius * q * Math.sin(a)
+  );
+}
+
+/* Curved cables */
+function arcPoints(start, end, lift, segments = 28) {
+  const a = start.clone().normalize();
+  const b = end.clone().normalize();
+  const angle = a.angleTo(b);
+  const points = [];
+
+  for (let i = 0; i <= segments; i++) {
+    const t = i / segments;
+    let direction;
+
+    if (angle < 0.001 || Math.abs(Math.sin(angle)) < 0.0001) {
+      direction = a.clone().lerp(b, t).normalize();
+    } else {
+      const s = Math.sin(angle);
+      direction = a.clone()
+        .multiplyScalar(Math.sin((1 - t) * angle) / s)
+        .add(
+          b.clone().multiplyScalar(Math.sin(t * angle) / s)
+        )
+        .normalize();
     }
-    points.push(d.multiplyScalar(R*1.018+Math.sin(Math.PI*t)*lift));
+
+    points.push(
+      direction.multiplyScalar(
+        R * 1.018 + Math.sin(Math.PI * t) * lift
+      )
+    );
   }
+
   return points;
 }
 
-const network=new THREE.Group();
+const network = new THREE.Group();
 earthGroup.add(network);
-const cableMats=[
-  new THREE.LineBasicMaterial({color:0x21caff,transparent:true,opacity:0.39,depthWrite:false}),
-  new THREE.LineBasicMaterial({color:0x1688df,transparent:true,opacity:0.31,depthWrite:false}),
-  new THREE.LineBasicMaterial({color:0x42e8ff,transparent:true,opacity:0.27,depthWrite:false})
-];
-const tracks=[];
-let cableIndex=0;
 
-function addCable(start,end,lift=0.15,segments=28){
-  const points=arcPoints(start,end,lift,segments);
-  const line=new THREE.Line(
+const cableMats = [
+  new THREE.LineBasicMaterial({
+    color:0x21caff, transparent:true, opacity:0.39, depthWrite:false
+  }),
+  new THREE.LineBasicMaterial({
+    color:0x1688df, transparent:true, opacity:0.31, depthWrite:false
+  }),
+  new THREE.LineBasicMaterial({
+    color:0x42e8ff, transparent:true, opacity:0.27, depthWrite:false
+  })
+];
+
+const tracks = [];
+let cableIndex = 0;
+
+function addCable(start, end, lift = 0.15, segments = 28) {
+  const points = arcPoints(start, end, lift, segments);
+
+  const line = new THREE.Line(
     new THREE.BufferGeometry().setFromPoints(points),
-    cableMats[cableIndex++%cableMats.length]
+    cableMats[cableIndex++ % cableMats.length]
   );
+
   network.add(line);
-  tracks.push({points,phase:Math.random(),speed:0.10+Math.random()*0.25});
+
+  tracks.push({
+    points,
+    phase:Math.random(),
+    speed:0.10 + Math.random() * 0.25
+  });
 }
 
-// Moderate wire density
-const rows=14,cols=26,grid=[];
-for(let row=0;row<=rows;row++){
-  const lat=-82+row*164/rows;
-  const points=[];
-  for(let col=0;col<cols;col++){
-    points.push(pointOnSphere(lat,-180+col*360/cols));
+/* Transmission network grid */
+const rows = 14;
+const cols = 26;
+const grid = [];
+
+for (let row = 0; row <= rows; row++) {
+  const lat = -82 + row * 164 / rows;
+  const points = [];
+
+  for (let col = 0; col < cols; col++) {
+    points.push(pointOnSphere(lat, -180 + col * 360 / cols));
   }
+
   grid.push(points);
 }
 
-for(let row=0;row<=rows;row++){
-  for(let col=0;col<cols;col++){
-    const next=(col+1)%cols;
-    addCable(grid[row][col],grid[row][next],0.025+Math.random()*0.06,10);
-    if(row<rows){
-      addCable(grid[row][col],grid[row+1][col],0.025+Math.random()*0.07,10);
-      if((row+col)%3===0){
-        addCable(grid[row][col],grid[row+1][next],0.07+Math.random()*0.13,14);
+for (let row = 0; row <= rows; row++) {
+  for (let col = 0; col < cols; col++) {
+    const next = (col + 1) % cols;
+
+    addCable(grid[row][col], grid[row][next],
+      0.025 + Math.random() * 0.06, 10);
+
+    if (row < rows) {
+      addCable(grid[row][col], grid[row + 1][col],
+        0.025 + Math.random() * 0.07, 10);
+
+      if ((row + col) % 3 === 0) {
+        addCable(grid[row][col], grid[row + 1][next],
+          0.07 + Math.random() * 0.13, 14);
       }
     }
   }
 }
 
-// Global energy hubs
-const hubSpecs=[
- [40,-74],[51.5,-0.1],[24.9,67],[23.8,90.4],[35.7,139.7],
- [19,72.8],[-33.9,151.2],[1.3,103.8],[30,31],[-23.5,-46.6],
- [37.6,127],[55.8,37.6],[48.8,2.3],[25.2,55.3],[-1.3,36.8],
- [43.7,-79.4],[34,-118.2],[39.9,116.4],[-34.6,-58.4],[52.5,13.4],
- [41.9,12.5],[28.6,77.2],[13.1,80.3],[31.2,121.5],
- [14.6,121],[-26.2,28],[19.4,-99.1],[60.2,24.9]
+/* Global energy hubs */
+const hubSpecs = [
+  [40,-74],[51.5,-0.1],[24.9,67],[23.8,90.4],[35.7,139.7],
+  [19,72.8],[-33.9,151.2],[1.3,103.8],[30,31],[-23.5,-46.6],
+  [37.6,127],[55.8,37.6],[48.8,2.3],[25.2,55.3],[-1.3,36.8],
+  [43.7,-79.4],[34,-118.2],[39.9,116.4],[-34.6,-58.4],[52.5,13.4],
+  [41.9,12.5],[28.6,77.2],[13.1,80.3],[31.2,121.5],
+  [14.6,121],[-26.2,28],[19.4,-99.1],[60.2,24.9]
 ];
-const hubs=hubSpecs.map(([lat,lon])=>pointOnSphere(lat,lon,R*1.025));
-const hubMeshes=[];
-const nodeGeo=new THREE.SphereGeometry(0.022,7,7);
-const nodeMat=new THREE.MeshBasicMaterial({color:0x8bf6ff});
 
-hubs.forEach((hub,i)=>{
-  const node=new THREE.Mesh(nodeGeo,nodeMat);
+const hubs = hubSpecs.map(([lat, lon]) =>
+  pointOnSphere(lat, lon, R * 1.025)
+);
+
+const hubMeshes = [];
+const nodeGeo = new THREE.SphereGeometry(0.022, 7, 7);
+const nodeMat = new THREE.MeshBasicMaterial({color:0x8bf6ff});
+
+hubs.forEach((hub, i) => {
+  const node = new THREE.Mesh(nodeGeo, nodeMat);
   node.position.copy(hub);
   network.add(node);
   hubMeshes.push(node);
 
-  const nearest=grid.flat().map(point=>({point,distance:point.distanceTo(hub)}))
-    .sort((a,b)=>a.distance-b.distance);
-  nearest.slice(0,3).forEach(item=>{
-    addCable(hub,item.point,0.10+Math.random()*0.25,18);
+  const nearest = grid.flat()
+    .map(point => ({point, distance:point.distanceTo(hub)}))
+    .sort((a, b) => a.distance - b.distance);
+
+  nearest.slice(0, 3).forEach(item => {
+    addCable(hub, item.point, 0.10 + Math.random() * 0.25, 18);
   });
 
-  const otherHubs=hubs.map((point,index)=>({point,index,distance:point.distanceTo(hub)}))
-    .filter(item=>item.index!==i).sort((a,b)=>a.distance-b.distance);
-  otherHubs.slice(0,2).forEach(item=>{
-    if(item.index>i) addCable(hub,item.point,0.18+Math.random()*0.45,24);
+  const otherHubs = hubs
+    .map((point, index) => ({
+      point,
+      index,
+      distance:point.distanceTo(hub)
+    }))
+    .filter(item => item.index !== i)
+    .sort((a, b) => a.distance - b.distance);
+
+  otherHubs.slice(0, 2).forEach(item => {
+    if (item.index > i) {
+      addCable(hub, item.point, 0.18 + Math.random() * 0.45, 24);
+    }
   });
 });
 
-// A few extra cross-globe wires
-for(let i=0;i<43;i++){
-  addCable(randomPoint(),randomPoint(),0.22+Math.random()*0.65,30);
+/* Additional cross-globe connections */
+for (let i = 0; i < 43; i++) {
+  addCable(randomPoint(), randomPoint(),
+    0.22 + Math.random() * 0.65, 30);
 }
 
-// Moving pulses: small spheres retain the same size and colour
-const pulseGeo=new THREE.SphereGeometry(0.016,6,6);
-const pulseMat=new THREE.MeshBasicMaterial({color:0x9bfff5});
-const pulses=[];
-tracks.forEach((track,index)=>{
-  if(index%3!==0)return;
-  const mesh=new THREE.Mesh(pulseGeo,pulseMat);
+/* Moving energy pulses */
+const pulseGeo = new THREE.SphereGeometry(0.016, 6, 6);
+const pulseMat = new THREE.MeshBasicMaterial({color:0x9bfff5});
+const pulses = [];
+
+tracks.forEach((track, index) => {
+  if (index % 3 !== 0) return;
+
+  const mesh = new THREE.Mesh(pulseGeo, pulseMat);
   network.add(mesh);
-  pulses.push({mesh,points:track.points,phase:track.phase,speed:track.speed});
+
+  pulses.push({
+    mesh,
+    points:track.points,
+    phase:track.phase,
+    speed:track.speed
+  });
 });
 
-// Pointer interaction: drag with mouse or finger
-const canvas=renderer.domElement;
-let dragging=false,pointerId=null,lastX=0,lastY=0;
-let velocityX=0,velocityY=0;
+/* Mouse and touch dragging */
+const canvas = renderer.domElement;
+let dragging = false;
+let pointerId = null;
+let lastX = 0;
+let lastY = 0;
+let velocityX = 0;
+let velocityY = 0;
 
-canvas.addEventListener("pointerdown",event=>{
-  dragging=true;
-  pointerId=event.pointerId;
-  lastX=event.clientX;
-  lastY=event.clientY;
-  velocityX=0;
-  velocityY=0;
-  canvas.style.cursor="grabbing";
+canvas.addEventListener("pointerdown", event => {
+  dragging = true;
+  pointerId = event.pointerId;
+  lastX = event.clientX;
+  lastY = event.clientY;
+  velocityX = 0;
+  velocityY = 0;
+  canvas.style.cursor = "grabbing";
   canvas.setPointerCapture(event.pointerId);
 });
 
-canvas.addEventListener("pointermove",event=>{
-  if(!dragging||event.pointerId!==pointerId)return;
-  const dx=event.clientX-lastX;
-  const dy=event.clientY-lastY;
-  earthGroup.rotation.y+=dx*0.006;
-  earthGroup.rotation.x+=dy*0.006;
-  earthGroup.rotation.x=Math.max(-1.35,Math.min(1.35,earthGroup.rotation.x));
-  velocityY=dx*0.0008;
-  velocityX=dy*0.0008;
-  lastX=event.clientX;
-  lastY=event.clientY;
+canvas.addEventListener("pointermove", event => {
+  if (!dragging || event.pointerId !== pointerId) return;
+
+  const dx = event.clientX - lastX;
+  const dy = event.clientY - lastY;
+
+  earthGroup.rotation.y += dx * 0.006;
+  earthGroup.rotation.x += dy * 0.006;
+  earthGroup.rotation.x = Math.max(
+    -1.35, Math.min(1.35, earthGroup.rotation.x)
+  );
+
+  velocityY = dx * 0.0008;
+  velocityX = dy * 0.0008;
+
+  lastX = event.clientX;
+  lastY = event.clientY;
 });
 
-function stopDrag(event){
-  if(!dragging)return;
-  if(event&&event.pointerId!==undefined&&event.pointerId!==pointerId)return;
-  dragging=false;
-  pointerId=null;
-  canvas.style.cursor="grab";
+function stopDrag(event) {
+  if (!dragging) return;
+  if (event && event.pointerId !== undefined &&
+      event.pointerId !== pointerId) return;
+
+  dragging = false;
+  pointerId = null;
+  canvas.style.cursor = "grab";
 }
-canvas.addEventListener("pointerup",stopDrag);
-canvas.addEventListener("pointercancel",stopDrag);
-canvas.addEventListener("lostpointercapture",()=>{dragging=false;pointerId=null;canvas.style.cursor="grab";});
 
-// Render continuously
-const clock=new THREE.Clock();
-function animate(){
+canvas.addEventListener("pointerup", stopDrag);
+canvas.addEventListener("pointercancel", stopDrag);
+canvas.addEventListener("lostpointercapture", () => {
+  dragging = false;
+  pointerId = null;
+  canvas.style.cursor = "grab";
+});
+
+/* Animation */
+const clock = new THREE.Clock();
+
+function animate() {
   requestAnimationFrame(animate);
-  const delta=Math.min(clock.getDelta(),0.04);
-  const elapsed=clock.elapsedTime;
 
-  if(!dragging){
-    earthGroup.rotation.y+=delta*0.043;
-    earthGroup.rotation.y+=velocityY;
-    earthGroup.rotation.x+=velocityX;
-    velocityX*=0.94;
-    velocityY*=0.94;
+  const delta = Math.min(clock.getDelta(), 0.04);
+  const elapsed = clock.elapsedTime;
+
+  if (!dragging) {
+    earthGroup.rotation.y += delta * 0.043;
+    earthGroup.rotation.y += velocityY;
+    earthGroup.rotation.x += velocityX;
+    velocityX *= 0.94;
+    velocityY *= 0.94;
   }
 
-  pulses.forEach(item=>{
-    item.phase=(item.phase+delta*item.speed)%1;
-    const p=item.phase*(item.points.length-1);
-    const i=Math.floor(p);
-    const j=Math.min(i+1,item.points.length-1);
-    item.mesh.position.copy(item.points[i].clone().lerp(item.points[j],p-i));
+  stars.rotation.y += delta * 0.002;
+
+  pulses.forEach(item => {
+    item.phase = (item.phase + delta * item.speed) % 1;
+
+    const p = item.phase * (item.points.length - 1);
+    const i = Math.floor(p);
+    const j = Math.min(i + 1, item.points.length - 1);
+
+    item.mesh.position.copy(
+      item.points[i].clone().lerp(item.points[j], p - i)
+    );
   });
 
-  hubMeshes.forEach((node,i)=>{
-    node.scale.setScalar(1+Math.sin(elapsed*1.4+i)*0.09);
+  hubMeshes.forEach((node, i) => {
+    node.scale.setScalar(1 + Math.sin(elapsed * 1.4 + i) * 0.09);
   });
 
-  renderer.render(scene,camera);
+  renderer.render(scene, camera);
 }
 
-function resize(){
-  const width=container.clientWidth||innerWidth;
-  const height=container.clientHeight||innerHeight;
-  camera.aspect=width/height;
+/* Responsive sizing */
+function resize() {
+  const width = container.clientWidth || window.innerWidth;
+  const height = container.clientHeight || window.innerHeight;
 
-  if(width<620){
-    camera.position.z=9.2;
+  camera.aspect = width / height;
+
+  if (width < 620) {
+    camera.position.z = 9.2;
     earthGroup.scale.setScalar(0.82);
-  }else if(width<900){
-    camera.position.z=8.8;
+  } else if (width < 900) {
+    camera.position.z = 8.8;
     earthGroup.scale.setScalar(0.91);
-  }else{
-    camera.position.z=8.5;
+  } else {
+    camera.position.z = 8.5;
     earthGroup.scale.setScalar(1);
   }
 
   camera.updateProjectionMatrix();
-  renderer.setSize(width,height);
+  renderer.setSize(width, height);
 }
 
-window.addEventListener("resize",resize);
+window.addEventListener("resize", resize);
 resize();
 animate();
 </script>
