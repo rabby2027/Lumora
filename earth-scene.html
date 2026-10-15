@@ -11,41 +11,103 @@ html,body,#scene{width:100%;height:100%;overflow:hidden;background:#071321}
 body{font-family:Arial,Helvetica,sans-serif}
 #scene{position:absolute;inset:0}
 canvas{display:block}
-.heading{position:absolute;top:25px;left:27px;z-index:2;pointer-events:none}
-.eyebrow{color:#67eaff;font-size:11px;font-weight:bold;letter-spacing:3px;margin-bottom:10px}
-h1{color:#eafaff;font-size:clamp(24px,3.7vw,36px);line-height:1.13;letter-spacing:-1px;text-shadow:0 0 20px #00a9db44}
+
+.heading{
+  position:absolute;top:25px;left:27px;z-index:2;
+  pointer-events:none
+}
+.eyebrow{
+  color:#67eaff;font-size:11px;font-weight:bold;
+  letter-spacing:3px;margin-bottom:10px
+}
+h1{
+  color:#eafaff;font-size:clamp(24px,3.7vw,36px);
+  line-height:1.13;letter-spacing:-1px;
+  text-shadow:0 0 20px #00a9db44
+}
 h1 span{color:#60e8ff}
-.subtitle{margin-top:10px;color:#8db9d0;font-size:10px;letter-spacing:1.6px}
-.metrics{position:absolute;top:50%;right:22px;transform:translateY(-38%);z-index:3;width:154px;display:grid;gap:11px;pointer-events:none}
-.metric{padding:12px 13px;border:1px solid #35cafa55;border-radius:14px;background:#091b2be8;backdrop-filter:blur(10px)}
+.subtitle{
+  margin-top:10px;color:#8db9d0;
+  font-size:10px;letter-spacing:1.6px
+}
+
+.metrics{
+  position:absolute;top:50%;right:22px;
+  transform:translateY(-38%);z-index:3;
+  width:154px;display:grid;gap:11px;
+  pointer-events:none
+}
+.metric{
+  padding:12px 13px;border:1px solid #35cafa55;
+  border-radius:14px;background:#091b2be8;
+  backdrop-filter:blur(10px)
+}
 .label{font-size:9px;color:#94bfd4;letter-spacing:1.2px}
 .value{margin-top:5px;color:#79efff;font-size:26px;font-weight:bold}
 .unit{font-size:12px}
 .note{margin-top:4px;color:#8daabd;font-size:9px}
-.legend{position:absolute;bottom:49px;left:25px;z-index:2;display:grid;gap:7px;color:#83a9bc;font-size:9px;letter-spacing:.5px;pointer-events:none}
-.legend span{display:flex;align-items:center;gap:7px}
-.legend i{width:16px;height:2px;display:inline-block;background:#29cfff;box-shadow:0 0 5px #29cfff}
-.legend .bright{background:#8bfff0;box-shadow:0 0 5px #8bfff0}
-.footer{position:absolute;bottom:18px;left:24px;right:24px;z-index:2;display:flex;justify-content:space-between;gap:8px;color:#83a9bc;font-size:9px;letter-spacing:.7px;pointer-events:none}
-.live{display:flex;align-items:center;gap:7px}
-.dot{width:6px;height:6px;border-radius:50%;background:#6effd7;box-shadow:0 0 8px #6effd7;animation:blink 1.6s infinite}
-.frame{position:absolute;inset:13px;z-index:4;border:1px solid #4dc8ef30;border-radius:23px;pointer-events:none}
-@keyframes blink{50%{opacity:.45}}
-@media(max-width:620px){
-.heading{top:22px;left:20px}
-.eyebrow{font-size:9px;letter-spacing:2px}
-h1{font-size:26px}
-.subtitle{font-size:9px}
-.metrics{top:auto;right:17px;bottom:68px;transform:none;width:122px;gap:7px}
-.metric{padding:9px;border-radius:10px}
-.label{font-size:8px;letter-spacing:.6px}
-.value{font-size:21px}
-.note{font-size:8px}
-.legend{left:20px;bottom:47px;font-size:8px;gap:6px}
-.footer{left:20px;right:20px;font-size:8px}
-.frame{inset:8px;border-radius:16px}
+
+.legend{
+  position:absolute;bottom:66px;left:27px;z-index:2;
+  display:grid;gap:9px;color:#83a9bc;font-size:9px;
+  letter-spacing:.5px;pointer-events:none
 }
-@media(prefers-reduced-motion:reduce){.dot{animation:none}}
+.legend span{display:flex;align-items:center;gap:7px}
+.legend i{
+  width:16px;height:2px;flex-shrink:0;
+  display:inline-block;background:#29cfff;
+  box-shadow:0 0 5px #29cfff
+}
+.legend .bright{background:#8bfff0;box-shadow:0 0 5px #8bfff0}
+
+.footer{
+  position:absolute;bottom:25px;left:27px;right:27px;
+  z-index:2;display:flex;justify-content:space-between;
+  align-items:center;gap:12px;color:#83a9bc;
+  font-size:9px;letter-spacing:.6px;pointer-events:none
+}
+.live{display:flex;align-items:center;gap:7px;white-space:nowrap}
+.dot{
+  width:6px;height:6px;flex-shrink:0;border-radius:50%;
+  background:#6effd7;box-shadow:0 0 8px #6effd7;
+  animation:blink 1.6s infinite
+}
+.footer span:last-child{text-align:right;white-space:nowrap}
+
+.frame{
+  position:absolute;inset:13px;z-index:4;
+  border:1px solid #4dc8ef30;border-radius:23px;
+  pointer-events:none
+}
+@keyframes blink{50%{opacity:.45}}
+
+@media(max-width:620px){
+  .heading{top:22px;left:20px}
+  .eyebrow{font-size:9px;letter-spacing:2px}
+  h1{font-size:26px}
+  .subtitle{font-size:9px}
+
+  .metrics{
+    top:auto;right:17px;bottom:92px;
+    transform:none;width:122px;gap:7px
+  }
+  .metric{padding:9px;border-radius:10px}
+  .label{font-size:8px;letter-spacing:.6px}
+  .value{font-size:21px}
+  .note{font-size:8px}
+
+  .legend{
+    left:20px;bottom:70px;gap:8px;font-size:8px
+  }
+  .footer{
+    left:20px;right:20px;bottom:25px;
+    font-size:8px;letter-spacing:.3px
+  }
+  .frame{inset:8px;border-radius:16px}
+}
+@media(prefers-reduced-motion:reduce){
+  .dot{animation:none}
+}
 </style>
 </head>
 <body>
@@ -84,6 +146,7 @@ h1{font-size:26px}
   <span class="live"><i class="dot"></i> ROTATING PLANET</span>
   <span>POWERING TOMORROW</span>
 </div>
+
 <div class="frame"></div>
 
 <script type="module">
@@ -227,7 +290,7 @@ function randomPoint(radius = R * 1.02) {
   );
 }
 
-// Curved cable path
+// Curved transmission cables
 function arcPoints(start, end, lift, segments = 38) {
   const a = start.clone().normalize();
   const b = end.clone().normalize();
@@ -287,13 +350,7 @@ let cableIndex = 0;
 
 function addCable(start, end, options = {}) {
   const lift = options.lift ?? (0.08 + Math.random() * 0.45);
-
-  const points = arcPoints(
-    start,
-    end,
-    lift,
-    options.segments || 32
-  );
+  const points = arcPoints(start, end, lift, options.segments || 32);
 
   const material =
     cableMaterials[cableIndex++ % cableMaterials.length];
@@ -314,8 +371,7 @@ function addCable(start, end, options = {}) {
   }
 }
 
-// Balanced grid density: columns reduced from 28 to 26.
-// Latitude rows are unchanged.
+// Wire density reduced; ball settings are unchanged
 const rows = 14;
 const cols = 26;
 const grid = [];
@@ -332,7 +388,7 @@ for (let row = 0; row <= rows; row++) {
   grid.push(points);
 }
 
-// Horizontal, vertical and selected diagonal cables
+// Grid cables and diagonal cross-links
 for (let row = 0; row <= rows; row++) {
   for (let col = 0; col < cols; col++) {
     const next = (col + 1) % cols;
@@ -358,7 +414,7 @@ for (let row = 0; row <= rows; row++) {
   }
 }
 
-// Regional energy hubs
+// Energy hubs
 const hubSpecs = [
   [40,-74],[51.5,-0.1],[24.9,67],[23.8,90.4],
   [35.7,139.7],[19,72.8],[-33.9,151.2],[1.3,103.8],
@@ -373,12 +429,11 @@ const hubs = hubSpecs.map(([lat, lon]) =>
   pointOnSphere(lat, lon, R * 1.025)
 );
 
-// Ball geometry and materials intentionally unchanged
+// Ball geometry, colour, size and animation remain unchanged
 const nodeGeometry = new THREE.SphereGeometry(0.022, 7, 7);
 const nodeMaterial = new THREE.MeshBasicMaterial({
   color: 0x8bf6ff
 });
-
 const hubMeshes = [];
 
 hubs.forEach((hub, i) => {
@@ -387,7 +442,6 @@ hubs.forEach((hub, i) => {
   network.add(node);
   hubMeshes.push(node);
 
-  // Connect hubs to three nearby grid points
   const candidates = grid.flat().map(point => ({
     point,
     distance: point.distanceTo(hub)
@@ -400,7 +454,6 @@ hubs.forEach((hub, i) => {
     });
   });
 
-  // Keep the hub-to-hub cross-connections
   const others = hubs.map((point, index) => ({
     point,
     index,
@@ -419,7 +472,7 @@ hubs.forEach((hub, i) => {
   });
 });
 
-// Long-distance wires reduced from 48 to 43
+// Long-distance wires
 for (let i = 0; i < 43; i++) {
   addCable(randomPoint(), randomPoint(), {
     lift: 0.22 + Math.random() * 0.65,
@@ -427,15 +480,13 @@ for (let i = 0; i < 43; i++) {
   });
 }
 
-// Small glowing pulses: unchanged geometry and brightness
+// Pulses remain unchanged
 const pulseGeometry = new THREE.SphereGeometry(0.016, 6, 6);
 const pulseMaterial = new THREE.MeshBasicMaterial({
   color: 0x9bfff5
 });
-
 const pulses = [];
 
-// Keep the same one-in-three pulse selection
 tracks.forEach((track, index) => {
   if (index % 3 !== 0) return;
 
@@ -481,7 +532,6 @@ function animate() {
     );
   });
 
-  // Keep node sizes and animation unchanged
   hubMeshes.forEach((node, i) => {
     node.scale.setScalar(
       1 + Math.sin(elapsed * 1.4 + i) * 0.09
